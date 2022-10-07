@@ -19,7 +19,7 @@ class PlayerClass(pygame.sprite.Sprite):
         self.spawn(worldnum)
 
         # all attributes associated with the player character
-        self.movementspeed = 10
+        self.movementspeed = 2
         self.health = 4
         self.attack = 2
 
@@ -127,3 +127,27 @@ def drawhealth(screen, font, health_value):
     screen.blit(font.render("Health: ", False, mn.WHITE), [10, 70])
     for i in range(health_value):
         pygame.draw.rect(screen, mn.WHITE, [100 + i * 15, 75, 10, 22])
+
+#  duplicate code functions
+
+def removeredundantmoves(listofcoords):
+    temporaryvar = -1  # -1, as we want the while loop to loop at least once.
+    temporarystart = 0
+    while temporarystart < len(listofcoords)-2:  # this while loop will loop the array and find out if there are redundant paths.
+        print(temporarystart, "tempstartval")
+        if len(listofcoords) != 0:
+            for z1 in range(temporarystart + 2, len(listofcoords)):  # finds out the next redundant
+                if abs(listofcoords[temporarystart][0] - listofcoords[z1][0]) == 1 and listofcoords[temporarystart][1] == listofcoords[z1][1]:
+                    temporaryvar = z1
+                    print(temporaryvar, "x check")
+                elif abs(listofcoords[temporarystart][1] - listofcoords[z1][1]) == 1 and listofcoords[temporarystart][0] == listofcoords[z1][0]:
+                    temporaryvar = z1
+                    print(temporaryvar, "y check")
+            if temporaryvar > 0:
+                print("i went through tempvarcheck")
+                listofcoords = listofcoords[:temporarystart + 1] + listofcoords[temporaryvar:]
+                print(listofcoords, "intermediate edit")
+                temporaryvar = -1
+            temporarystart += 1
+    print(listofcoords, "edit")
+    return listofcoords

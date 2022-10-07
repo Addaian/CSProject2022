@@ -57,8 +57,6 @@ if __name__ == '__main__':
 
     # level block size, and calculating the block locations on the screen per stage
     levelblocksize = 60
-    # temporary level block list (will increase automatically later)
-    levelblocklist = wc.read(worldnum)
 
 
     def levelblockloc_x(x):
@@ -96,6 +94,9 @@ if __name__ == '__main__':
 
         screen.fill(BLACK)
 
+        # temporary level block list (will increase automatically later)
+        levelblocklist = wc.read(worldnum)
+
         '''INPUTS THAT ARE ACHIEVED'''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # had an issue with running the game before implementing this
@@ -114,6 +115,8 @@ if __name__ == '__main__':
                         completedmovement = False
                         player_move_draw_list = player.findbestpath(worldnum, player.movementspeed,
                                                                     player.locationarray, [pos_x, pos_y], [])
+                        print(player_move_draw_list, "unedit")
+                        player_move_draw_list = pa.removeredundantmoves(player_move_draw_list)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     tb.turnend(True)

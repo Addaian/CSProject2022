@@ -30,21 +30,6 @@ def calculatelandmoveable(worldnum, movementdist,
     To expand on this algorithm, see drawmove() below. 
     '''
 
-    '''
-    PREVIOUS CODE
-    for i in range(-movementdist, movementdist + 1):
-        if 0 <= location[0] + i <= 8:
-            for x in range(movementdist - abs(i) + 1):
-                if 0 <= location[1] - x <= 8:
-                    if wc.read(worldnum)[location[1] - x][location[0] + i] == "#":
-                        listofcoords.append([location[0] + i, location[1] - x])
-
-                if 0 < location[1] + x <= 8:
-                    if wc.read(worldnum)[location[1] + x][location[0] + i] == "#":
-                        listofcoords.append([location[0] + i, location[1] + x])
-    # after finding all coordinates that the player can possibly land on that is land, we can find all inaccessible
-    # tiles from our tile.'''
-
     if movementdist != -1:
         movementdist -= 1
         worldarray = wc.read(worldnum)  # [y] [x]
