@@ -7,6 +7,8 @@ import turnbasedsys as tb
 import playermovement as pm
 import math as m
 import playerattributes as pa
+import enemyattributes as ea
+import enemymovement as em
 
 pygame.init()
 pygame.font.init()
@@ -40,10 +42,26 @@ change_every_x_seconds = 0.7
 number_of_steps = change_every_x_seconds * FPS
 step = 1
 
+# level block size, and calculating the block locations on the screen per stage
+levelblocksize = 60
+
+
+def blockloc_x(x):
+    return (x * levelblocksize) + (screen.get_width() - levelblocksize * 9) / 2
+
+def blockloc_y(y):
+    return (y * levelblocksize) + (screen.get_height() - levelblocksize * 9) / 2
+
 # global variables
 worldnum = 0  # world number - the unique identifier of a world in a floor.
 difficulty = 2  # difficulty - 1 - easy, 2 - medium, 3 - hard, 4 - ironmode (1 health cap)
 draw_move_speed = 10  # drawn 2 px at a time. This is for objects that are animated through the tiles.
+occ_list = []  # this list is used to notate all tiles that are currently occupied or cannot be moved to.
+
+# REMEMBER TO ADD OCC LIST TO EVERYTHING!!!!
+# REMEMBER TO ADD OCC LIST TO EVERYTHING!!!!
+# REMEMBER TO ADD OCC LIST TO EVERYTHING!!!!
+# REMEMBER TO ADD OCC LIST TO EVERYTHING!!!!
 
 # fonts
 detsans = pygame.font.Font("fonts/detsans.ttf", 30)
@@ -55,18 +73,6 @@ if __name__ == '__main__':
     wc.create()
     worldnum += 1
 
-    # level block size, and calculating the block locations on the screen per stage
-    levelblocksize = 60
-
-
-    def levelblockloc_x(x):
-        return (x * levelblocksize) + (screen.get_width() - levelblocksize * 9) / 2
-
-
-    def levelblockloc_y(y):
-        return (y * levelblocksize) + (screen.get_height() - levelblocksize * 9) / 2
-
-
     # display
     # Set the height and width of the screen
     screen = pygame.display.set_mode([1280, 720], pygame.RESIZABLE)
@@ -76,15 +82,23 @@ if __name__ == '__main__':
 
     # sprites groups
     all_sprites_list = pygame.sprite.Group()
-
+    enemylist = []
     # declare and add player to the sprites list
     player = pa.PlayerClass(worldnum)
+
+    occ_list.append(player.locationarray)  # the space the player is on is now unavailable for future spawns.
+
+    enemy1 = ea.EnemyClass(worldnum, occ_list)
+
+    enemylist.append(enemy1)  # used to update all enemies
     all_sprites_list.add(player)
+    all_sprites_list.add(enemy1)
 
     # movement variables
     completedmovement = True
     tempaddx = 0
     tempaddy = 0
+    # declaring the first instance of current land and water movables. updates throughout the loop.
     current_land_movable = pm.calculatelandmoveable(worldnum, player.movementspeed, player.locationarray)
     current_water_movable = pm.calculatewatermoveable(worldnum, player.movementspeed, player.locationarray)
 
@@ -115,7 +129,6 @@ if __name__ == '__main__':
                         completedmovement = False
                         player_move_draw_list = player.findbestpath(worldnum, player.movementspeed,
                                                                     player.locationarray, [pos_x, pos_y], [])
-                        print(player_move_draw_list, "unedit")
                         player_move_draw_list = pa.removeredundantmoves(player_move_draw_list)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -125,18 +138,14 @@ if __name__ == '__main__':
         for y in range(len(levelblocklist)):
             for x in range(len(levelblocklist)):
                 if levelblocklist[y][x] == "#":
-                    pygame.draw.rect(screen, GRAY,
-                                     [levelblockloc_x(x), levelblockloc_y(y), levelblocksize, levelblocksize])
-                    pygame.draw.rect(screen, BLACK,
-                                     [levelblockloc_x(x), levelblockloc_y(y), levelblocksize, levelblocksize], 1, 1)
+                    pygame.draw.rect(screen, GRAY, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
+                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1, 1)
                 elif levelblocklist[y][x] == "_":
                     pygame.draw.rect(screen, BLUE,
-                                     [levelblockloc_x(x), levelblockloc_y(y), levelblocksize, levelblocksize])
-                    pygame.draw.rect(screen, BLACK,
-                                     [levelblockloc_x(x), levelblockloc_y(y), levelblocksize, levelblocksize], 1, 1)
+                                     [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
+                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1, 1)
                 else:
-                    pygame.draw.rect(screen, BLACK,
-                                     [levelblockloc_x(x), levelblockloc_y(y), levelblocksize, levelblocksize])
+                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
 
         # update the colours of highlighted moves
         step += 1
@@ -155,14 +164,19 @@ if __name__ == '__main__':
             water_base_color = water_next_color
             water_next_color = next(watermovecolors)
 
-        # update all sprites on the list
+        # update player sprite
         player.rect.x = player.locationarray[0] * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
                 (levelblocksize - 20) / 2) + tempaddx
         player.rect.y = player.locationarray[1] * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + (
                 (levelblocksize - 20) / 2) + tempaddy
 
+        # update enemy sprites
+        for i in enemylist:
+            i.rect.x = i.locationarray[0] * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + ((levelblocksize - 20) / 2)
+            i.rect.y = i.locationarray[1] * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + ((levelblocksize - 20) / 2)
+
         # this if statement will animate the player from one location to another.
-        if completedmovement == False:
+        if not completedmovement:
             if player_move_draw_list[0] == player.locationarray:
                 player_move_draw_list.pop(0)
                 if len(player_move_draw_list) == 0:
@@ -198,10 +212,8 @@ if __name__ == '__main__':
         screen.blit(detsans.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
 
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and completedmovement:
-            pm.drawlandmove(screen, current_land_color, levelblockloc_x, levelblockloc_y, levelblocksize,
-                            current_land_movable)
-            pm.drawwatermove(screen, current_water_color, levelblockloc_x, levelblockloc_y, levelblocksize,
-                             current_water_movable)
+            pm.drawlandmove(screen, current_land_color, blockloc_x, blockloc_y, current_land_movable)
+            pm.drawwatermove(screen, current_water_color, blockloc_x, blockloc_y, current_water_movable)
         pa.drawhealth(screen, detsans, player.health)
 
         all_sprites_list.draw(screen)

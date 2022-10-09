@@ -103,13 +103,13 @@ def calculatewatermoveable(worldnum, movementdist, location):
     return new_list
 
 
-def drawlandmove(screen, currentcolor, locx, locy, levelblocksize, listoflandcoords):
+def drawlandmove(screen, currentcolor, locx, locy, listoflandcoords):
     for x in listoflandcoords:
-        pygame.draw.rect(screen, currentcolor, [locx(x[0]), locy(x[1]), levelblocksize, levelblocksize])
-        pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), levelblocksize, levelblocksize], 1, 1)
+        pygame.draw.rect(screen, currentcolor, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize])
+        pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize], 1, 1)
 
 
-def drawwatermove(screen, currentcolor, locx, locy, levelblocksize, listofwatercoords):
+def drawwatermove(screen, currentcolor, locx, locy, listofwatercoords):
     for x in listofwatercoords:
-        pygame.draw.rect(screen, currentcolor, [locx(x[0]), locy(x[1]), levelblocksize, levelblocksize])
-        pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), levelblocksize, levelblocksize], 1, 1)
+        pygame.draw.rect(screen, currentcolor, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize])
+        pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize], 1, 1)

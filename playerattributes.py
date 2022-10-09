@@ -31,9 +31,11 @@ class PlayerClass(pygame.sprite.Sprite):
         self.locationarray[1] = locy
         # we must find the optimal path to the location in question. therefore, we must use recursion.
 
-    def findbestpath(self, worldnum, movementdist, location,
-                     finallocation, prevnode):  # we can also use this function to draw arrows during player movement.
-        listofcoords = []  # using recursion, we can find a list of coords from the original location to the end point and append all locations between those points
+    def findbestpath(self, worldnum, movementdist, location, finallocation, prevnode):
+        # we can also use this function to draw arrows during player movement.
+        listofcoords = []
+        # using recursion, we can find a list of coords from the original location to the end
+        # point and append all locations between those points
         if movementdist != -1:
             movementdist -= 1
             worldarray = wc.read(worldnum)  # [y] [x]
@@ -51,8 +53,11 @@ class PlayerClass(pygame.sprite.Sprite):
                     if worldarray[location[1] + 1][location[0]] == "^":
                         None
                     elif worldarray[location[1] + 1][location[0]] == "#":
-                        listofcoords.extend(self.findbestpath(worldnum, movementdist, [location[0], location[1] + 1], finallocation, listofcoords))
-                        if listofcoords[-1] == finallocation:  # saying, if the last element is the final loc, keep returning it.
+                        listofcoords.extend(
+                            self.findbestpath(worldnum, movementdist, [location[0], location[1] + 1], finallocation,
+                                              listofcoords))
+                        if listofcoords[-1] == finallocation:
+                            # saying, if the last element is the final loc, keep returning it.
                             listofcoords = [x for x in listofcoords if x]
                             return listofcoords
                     elif [location[0], location[1] + 1] == finallocation:
@@ -63,7 +68,9 @@ class PlayerClass(pygame.sprite.Sprite):
                     if worldarray[location[1] - 1][location[0]] == "^":
                         None
                     elif worldarray[location[1] - 1][location[0]] != "_":
-                        listofcoords.extend(self.findbestpath(worldnum, movementdist, [location[0], location[1] - 1], finallocation, listofcoords))
+                        listofcoords.extend(
+                            self.findbestpath(worldnum, movementdist, [location[0], location[1] - 1], finallocation,
+                                              listofcoords))
                         if listofcoords[-1] == finallocation:
                             listofcoords = [x for x in listofcoords if x]
                             return listofcoords
@@ -75,7 +82,9 @@ class PlayerClass(pygame.sprite.Sprite):
                     if worldarray[location[1]][location[0] + 1] == "^":
                         None
                     elif worldarray[location[1]][location[0] + 1] != "_":
-                        listofcoords.extend(self.findbestpath(worldnum, movementdist, [location[0] + 1, location[1]], finallocation, listofcoords))
+                        listofcoords.extend(
+                            self.findbestpath(worldnum, movementdist, [location[0] + 1, location[1]], finallocation,
+                                              listofcoords))
                         if listofcoords[-1] == finallocation:
                             listofcoords = [x for x in listofcoords if x]
                             return listofcoords
@@ -87,7 +96,9 @@ class PlayerClass(pygame.sprite.Sprite):
                     if worldarray[location[1]][location[0] - 1] == "^":
                         None
                     elif worldarray[location[1]][location[0] - 1] != "_":
-                        listofcoords.extend(self.findbestpath(worldnum, movementdist, [location[0] - 1, location[1]], finallocation, listofcoords))
+                        listofcoords.extend(
+                            self.findbestpath(worldnum, movementdist, [location[0] - 1, location[1]], finallocation,
+                                              listofcoords))
                         if listofcoords[-1] == finallocation:
                             listofcoords = [x for x in listofcoords if x]
                             return listofcoords
@@ -128,12 +139,13 @@ def drawhealth(screen, font, health_value):
     for i in range(health_value):
         pygame.draw.rect(screen, mn.WHITE, [100 + i * 15, 75, 10, 22])
 
+
 #  duplicate code functions
 
 def removeredundantmoves(listofcoords):
     temporaryvar = -1  # -1, as we want the while loop to loop at least once.
     temporarystart = 0
-    while temporarystart < len(listofcoords)-2:  # this while loop will loop the array and find out if there are redundant paths.
+    while temporarystart < len(listofcoords) - 2:  # this while loop will loop the array and find out if there are redundant paths.
         print(temporarystart, "tempstartval")
         if len(listofcoords) != 0:
             for z1 in range(temporarystart + 2, len(listofcoords)):  # finds out the next redundant
