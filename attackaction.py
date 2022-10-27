@@ -7,13 +7,12 @@ import math as m
 
 
 # this function will find the enemies that is in range of the player.
-def calculate_melee(location, moverange, occupiedlist):
+def calculate_melee(location, attackrange, occupiedlist):
     attackable_list = []
     for i in occupiedlist:
-        if abs(i[0] - location[0]) + abs(i[1] - location[1]) <= moverange:
+        if abs(i[0] - location[0]) + abs(i[1] - location[1]) <= attackrange:
             if i != location:
                 attackable_list.append(i)
-    print(attackable_list, "a_list")
     return attackable_list
 
 

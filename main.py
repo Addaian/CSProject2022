@@ -1,15 +1,16 @@
-import pygame
-import random
 import glob
 import itertools
-import worldcreate as wc
-import turnbasedsys as tb
-import playermovement as pm
 import math as m
-import playerattributes as pa
-import enemyattributes as ea
-import enemymovement as em
+import random
+
+import pygame
+
 import attackaction as aa
+import enemyattributes as ea
+import playerattributes as pa
+import playermovement as pm
+import turn as tb
+import worldcreate as wc
 
 pygame.init()
 pygame.font.init()
@@ -58,7 +59,7 @@ current_attack_water_color = attack_water_base_color
 FPS = 60  # used for color wheel cycles and generally determines the FPS of the screen.
 change_every_x_seconds = 0.7  # how long it take for the color wheel to cycle from 1 color to another.
 number_of_steps = change_every_x_seconds * FPS
-step = 1
+step = 0.5
 
 # level block size, and calculating the block locations on the screen per stage
 levelblocksize = 60
@@ -89,9 +90,11 @@ def removeredundantmoves(listofcoords):
             listofcoords) - 2:  # this while loop will loop the array and find out if there are redundant paths.
         if len(listofcoords) != 0:
             for z1 in range(temporarystart + 2, len(listofcoords)):  # finds out the next redundant
-                if abs(listofcoords[temporarystart][0] - listofcoords[z1][0]) == 1 and listofcoords[temporarystart][1] == listofcoords[z1][1]:
+                if abs(listofcoords[temporarystart][0] - listofcoords[z1][0]) == 1 and listofcoords[temporarystart][
+                    1] == listofcoords[z1][1]:
                     temporaryvar = z1
-                elif abs(listofcoords[temporarystart][1] - listofcoords[z1][1]) == 1 and listofcoords[temporarystart][0] == listofcoords[z1][0]:
+                elif abs(listofcoords[temporarystart][1] - listofcoords[z1][1]) == 1 and listofcoords[temporarystart][
+                    0] == listofcoords[z1][0]:
                     temporaryvar = z1
             if temporaryvar > 0:
                 listofcoords = listofcoords[:temporarystart + 1] + listofcoords[temporaryvar:]
@@ -99,8 +102,10 @@ def removeredundantmoves(listofcoords):
             temporarystart += 1
     return listofcoords
 
+
 # fonts
-detsans = pygame.font.Font("fonts/detsans.ttf", 30)
+detsans_normal = pygame.font.Font("fonts/detsans.ttf", 30)
+detsans_large = pygame.font.Font("fonts/detsans.ttf", 60)
 
 if __name__ == '__main__':
     # globals
@@ -124,14 +129,14 @@ if __name__ == '__main__':
 
     occ_list.append(player.locationarray)  # the space the player is on is now unavailable for future spawns and moves.
 
-    enemy1 = ea.EnemyClass(worldnum, occ_list)
-
-    occ_list.append(enemy1.locationarray)  # this space is now unavailable for future moves.
-
-    enemylist.append(enemy1)  # used to update all enemies
+    # using this for loop, spawn an initial 5 enemies into first world.
+    for i in range(5):
+        enemy_instance = ea.EnemyClass(worldnum, occ_list)
+        occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
+        enemylist.append(enemy_instance)  # used to update all enemies
+        all_sprites_list.add(enemy_instance)
 
     all_sprites_list.add(player)  # used to draw both player and enemy at the end of the loop.
-    all_sprites_list.add(enemy1)
 
     # movement variables
     completedmovement = True
@@ -236,7 +241,6 @@ if __name__ == '__main__':
             attack_water_base_color = attack_water_next_color
             attack_water_next_color = next(attackcolors_water)
 
-
         # update player sprite
         player.rect.x = player.locationarray[0] * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
                 (levelblocksize - 20) / 2) + tempaddx
@@ -266,8 +270,6 @@ if __name__ == '__main__':
                     occ_list.append(player.locationarray)
 
                     # here, the new attacks are calculated.
-                    print(occ_list, "occ_l")
-                    print(player.locationarray, "loca")
                     current_all_attackable = aa.calculate_melee(player.locationarray, player.reach, occ_list)
 
                     # finally, end the turn.
@@ -295,9 +297,9 @@ if __name__ == '__main__':
                         tempaddy = 0
 
         # print all sprites on the list
-        screen.blit(detsans.render("Turn Number: " + str(m.ceil(tb.turnnumber / 4)), False, WHITE), [10, 10])
+        screen.blit(detsans_normal.render("Turn Number: " + str(m.ceil(tb.turnnumber / 4)), False, WHITE), [10, 10])
 
-        screen.blit(detsans.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
+        screen.blit(detsans_normal.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
 
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and completedmovement:
             pm.drawlandmove(screen, current_land_color, blockloc_x, blockloc_y, current_land_movable)
@@ -307,10 +309,18 @@ if __name__ == '__main__':
             aa.drawattack(screen, worldnum, current_attack_land_color, current_attack_water_color, blockloc_x,
                           blockloc_y, current_all_attackable)
 
-        pa.drawhealth(screen, detsans, player.health)
-        pa.drawattack(screen, detsans, player.attack)
+        pa.drawhealth(screen, detsans_normal, player.health)
+        pa.drawattack(screen, detsans_normal, player.attack)
 
         all_sprites_list.draw(screen)
+
+        # a loop that detects if the mouse is hovering on an enemy instance.
+        # if yes, then draw the attributes of enemy on right side of screen
+        for enemy in enemylist:
+            if enemy.rect.collidepoint(pygame.mouse.get_pos()):
+                screen.blit(detsans_large.render("Enemy", False, WHITE), [920, 80])
+                ea.drawhealth(screen, detsans_normal, enemy.health)
+                ea.drawattack(screen, detsans_normal, enemy.attack)
 
         # update the screen.
         pygame.display.flip()

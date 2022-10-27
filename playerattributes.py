@@ -1,9 +1,9 @@
-import pygame
-import random
-import worldcreate as wc
-import main as mn
 import os
-import math as m
+
+import pygame
+
+import main as mn
+import worldcreate as wc
 
 
 class PlayerClass(pygame.sprite.Sprite):

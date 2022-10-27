@@ -5,6 +5,8 @@ import main as mn
 import playerattributes as pa
 import os
 import math as m
+
+
 class EnemyClass(pygame.sprite.Sprite):
     def __init__(self, worldnum, occupied_list):
         super().__init__()
@@ -18,8 +20,8 @@ class EnemyClass(pygame.sprite.Sprite):
         self.spawn(worldnum, occupied_list)
         # all attributes associated with the player character
         self.movementspeed = 2
-        self.health = 3
-        self.attack = 2
+        self.health = random.randint(3, 5)
+        self.attack = random.randint(1, 2)
 
     def updatelocation(self, locx, locy):
         self.locationarray[0] = locx
@@ -38,3 +40,15 @@ class EnemyClass(pygame.sprite.Sprite):
                 if [final_x, final_y] not in occupied_list:
                     done = True
         self.updatelocation(final_x, final_y)
+
+
+def drawhealth(screen, font, health_value):
+    screen.blit(font.render("Health: ", False, mn.WHITE), [920, 145])
+    for i in range(health_value):
+        pygame.draw.rect(screen, mn.WHITE, [1010 + i * 15, 150, 10, 22])
+
+
+def drawattack(screen, font, attack_value):
+    screen.blit(font.render("Attack: ", False, mn.WHITE), [920, 175])
+    for i in range(attack_value):
+        pygame.draw.rect(screen, mn.RED, [1010 + i * 15, 180, 10, 22])
