@@ -22,10 +22,91 @@ class EnemyClass(pygame.sprite.Sprite):
         self.movementspeed = 2
         self.health = random.randint(3, 5)
         self.attack = random.randint(1, 2)
+        self.awareness_radius = 3 # determines the distance at which the enemy will become aware of the player.
 
     def updatelocation(self, locx, locy):
         self.locationarray[0] = locx
         self.locationarray[1] = locy
+
+    def findbestpath(self, worldnum, movementdist, location, finallocation, prevnode, occ_list):
+        # using same algorithm as in playerattributes.py.
+        listofcoords = []
+        if movementdist != -1:
+            movementdist -= 1
+            worldarray = wc.read(worldnum)  # [y] [x]
+            if 0 <= location[0] <= 8 and 0 <= location[1] <= 8:
+                listofcoords.append(location)
+                if abs(location[0] - finallocation[0]) == 1 and location[1] == finallocation[1]:
+                    listofcoords.append(finallocation)
+                    return listofcoords
+                if abs(location[1] - finallocation[1]) == 1 and location[0] == finallocation[0]:
+                    listofcoords.append(finallocation)
+                    return listofcoords
+                if location == finallocation:  # saying, if the location is found, just return the location
+                    return [location]
+                if 0 <= location[1] + 1 <= 8 and [location[0], location[1] + 1] not in prevnode:
+                    if [location[0], location[1] + 1] not in occ_list:  # if the next part is not in the occupied list:
+                        if worldarray[location[1] + 1][location[0]] == "^":
+                            None
+                        elif worldarray[location[1] + 1][location[0]] == "#":
+                            listofcoords.extend(
+                                self.findbestpath(worldnum, movementdist, [location[0], location[1] + 1], finallocation,
+                                                  listofcoords, occ_list))
+                            if listofcoords[-1] == finallocation:
+                                # saying, if the last element is the final loc, keep returning it.
+                                listofcoords = [x for x in listofcoords if x]
+                                return listofcoords
+                        elif [location[0], location[1] + 1] == finallocation:
+                            listofcoords.append(finallocation)
+                            return listofcoords
+
+                if 0 <= location[1] - 1 <= 8 and [location[0], location[1] - 1] not in prevnode:
+                    if [location[0], location[1] - 1] not in occ_list:
+                        if worldarray[location[1] - 1][location[0]] == "^":
+                            None
+                        elif worldarray[location[1] - 1][location[0]] != "_":
+                            listofcoords.extend(
+                                self.findbestpath(worldnum, movementdist, [location[0], location[1] - 1], finallocation,
+                                                  listofcoords, occ_list))
+                            if listofcoords[-1] == finallocation:
+                                listofcoords = [x for x in listofcoords if x]
+                                return listofcoords
+                        elif [location[0], location[1] - 1] == finallocation:
+                            listofcoords.append(finallocation)
+                            return listofcoords
+
+                if 0 <= location[0] + 1 <= 8 and [location[0] + 1, location[1]] not in prevnode:
+                    if [location[0] + 1, location[1]] not in occ_list:
+                        if worldarray[location[1]][location[0] + 1] == "^":
+                            None
+                        elif worldarray[location[1]][location[0] + 1] != "_":
+                            listofcoords.extend(
+                                self.findbestpath(worldnum, movementdist, [location[0] + 1, location[1]], finallocation,
+                                                  listofcoords, occ_list))
+                            if listofcoords[-1] == finallocation:
+                                listofcoords = [x for x in listofcoords if x]
+                                return listofcoords
+                        elif [location[0] + 1, location[1]] == finallocation:
+                            listofcoords.append(finallocation)
+                            return listofcoords
+
+                if 0 <= location[0] - 1 <= 8 and [location[0] - 1, location[1]] not in prevnode:
+                    if [location[0] - 1, location[1]] not in occ_list:
+                        if worldarray[location[1]][location[0] - 1] == "^":
+                            None
+                        elif worldarray[location[1]][location[0] - 1] != "_":
+                            listofcoords.extend(
+                                self.findbestpath(worldnum, movementdist, [location[0] - 1, location[1]], finallocation,
+                                                  listofcoords, occ_list))
+                            if listofcoords[-1] == finallocation:
+                                listofcoords = [x for x in listofcoords if x]
+                                return listofcoords
+                        elif [location[0] - 1, location[1]] == finallocation:
+                            listofcoords.append(finallocation)
+                            return listofcoords
+            else:
+                return []  # returns blanks if not between 0 and 8
+        return []  # returns blanks if no more movement distance.
 
     # this function will pick a random location that is a land tile, and spawn the enemy on it.
     def spawn(self, worldnum, occupied_list):

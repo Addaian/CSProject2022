@@ -7,7 +7,7 @@ import itertools
 
 
 # this function pops out all coordinates on the map, that the player can possibly move to, in a list datatype
-def calculatelandmoveable(worldnum, movementdist, location, oclist):  # takes in movement speed of the enemy / player object, and takes the
+def calculatelandmovable(worldnum, movementdist, location, oclist):  # takes in movement speed of the enemy / player object, and takes the
     # location of the enemy / player object.
     listofcoords = []
     '''
@@ -37,16 +37,16 @@ def calculatelandmoveable(worldnum, movementdist, location, oclist):  # takes in
                     listofcoords.extend([location])
                 if 0 <= location[1] + 1 <= 8:
                     if worldarray[location[1] + 1][location[0]] == "#":
-                        listofcoords.extend(calculatelandmoveable(worldnum, movementdist, [location[0], location[1] + 1], oclist))
+                        listofcoords.extend(calculatelandmovable(worldnum, movementdist, [location[0], location[1] + 1], oclist))
                 if 0 <= location[1] - 1 <= 8:
                     if worldarray[location[1] - 1][location[0]] == "#":
-                        listofcoords.extend(calculatelandmoveable(worldnum, movementdist, [location[0], location[1] - 1], oclist))
+                        listofcoords.extend(calculatelandmovable(worldnum, movementdist, [location[0], location[1] - 1], oclist))
                 if 0 <= location[0] + 1 <= 8:
                     if worldarray[location[1]][location[0] + 1] == "#":
-                        listofcoords.extend(calculatelandmoveable(worldnum, movementdist, [location[0] + 1, location[1]], oclist))
+                        listofcoords.extend(calculatelandmovable(worldnum, movementdist, [location[0] + 1, location[1]], oclist))
                 if 0 <= location[0] - 1 <= 8:
                     if worldarray[location[1]][location[0] - 1] == "#":
-                        listofcoords.extend(calculatelandmoveable(worldnum, movementdist, [location[0] - 1, location[1]], oclist))
+                        listofcoords.extend(calculatelandmovable(worldnum, movementdist, [location[0] - 1, location[1]], oclist))
     if not listofcoords:
         return []
     listofcoords = [x for x in listofcoords if x]
@@ -58,7 +58,7 @@ def calculatelandmoveable(worldnum, movementdist, location, oclist):  # takes in
     return new_list
 
 
-def calculatewatermoveable(worldnum, movementdist, location, oclist):
+def calculatewatermovable(worldnum, movementdist, location, oclist):
     listofcoords = []
     worldarray = wc.read(worldnum)  # [y] [x]
     if movementdist != -1:
@@ -67,27 +67,31 @@ def calculatewatermoveable(worldnum, movementdist, location, oclist):
             if location not in oclist:
                 if 0 <= location[1] + 1 <= 8:
                     if worldarray[location[1] + 1][location[0]] == "#":
-                        listofcoords.extend(calculatewatermoveable(worldnum, movementdist, [location[0], location[1] + 1], oclist))
+                        listofcoords.extend(calculatewatermovable(worldnum, movementdist, [location[0], location[1] + 1], oclist))
                     elif worldarray[location[1] + 1][location[0]] == "_" and movementdist != -1:
-                        listofcoords.append([location[0], location[1] + 1])
+                        if [location[0], location[1] + 1] not in oclist:
+                            listofcoords.append([location[0], location[1] + 1])
 
                 if 0 <= location[1] - 1 <= 8:
                     if worldarray[location[1] - 1][location[0]] == "#":
-                        listofcoords.extend(calculatewatermoveable(worldnum, movementdist, [location[0], location[1] - 1], oclist))
+                        listofcoords.extend(calculatewatermovable(worldnum, movementdist, [location[0], location[1] - 1], oclist))
                     elif worldarray[location[1] - 1][location[0]] == "_" and movementdist != -1:
-                        listofcoords.append([location[0], location[1] - 1])
+                        if [location[0], location[1] - 1] not in oclist:
+                            listofcoords.append([location[0], location[1] - 1])
 
                 if 0 <= location[0] + 1 <= 8:
                     if worldarray[location[1]][location[0] + 1] == "#":
-                        listofcoords.extend(calculatewatermoveable(worldnum, movementdist, [location[0] + 1, location[1]], oclist))
+                        listofcoords.extend(calculatewatermovable(worldnum, movementdist, [location[0] + 1, location[1]], oclist))
                     elif worldarray[location[1]][location[0] + 1] == "_" and movementdist != -1:
-                        listofcoords.append([location[0] + 1, location[1]])
+                        if [location[0] + 1, location[1]] not in oclist:
+                            listofcoords.append([location[0] + 1, location[1]])
 
                 if 0 <= location[0] - 1 <= 8:
                     if worldarray[location[1]][location[0] - 1] == "#":
-                        listofcoords.extend(calculatewatermoveable(worldnum, movementdist, [location[0] - 1, location[1]], oclist))
+                        listofcoords.extend(calculatewatermovable(worldnum, movementdist, [location[0] - 1, location[1]], oclist))
                     elif worldarray[location[1]][location[0] - 1] == "_" and movementdist != -1:
-                        listofcoords.append([location[0] - 1, location[1]])
+                        if [location[0] - 1, location[1]] not in oclist:
+                            listofcoords.append([location[0] - 1, location[1]])
 
                 if worldarray[location[1]][location[0]] == "_":
                     listofcoords.append(location)

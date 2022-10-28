@@ -14,7 +14,7 @@ class PlayerClass(pygame.sprite.Sprite):
         # declare image and get the rect associated with it. Fill with colour light orange (temporary).
         self.image = pygame.Surface([20, 20])
         self.rect = self.image.get_rect()
-        self.image.fill(mn.LIGHTORANGE)
+        self.image.fill(mn.BLACK)
         # spawn the player in the world, at the entrance of the room.
         self.spawn(worldnum)
 
