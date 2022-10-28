@@ -193,6 +193,7 @@ if __name__ == '__main__':
                             # then hops over to move animation if statement.
 
                 if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmovement:
+
                     pos_x = int(
                         (pygame.mouse.get_pos()[0] - (screen.get_width() - levelblocksize * 9) / 2) // levelblocksize)
                     pos_y = int(
@@ -248,7 +249,6 @@ if __name__ == '__main__':
                 enemy_event_list.append(bestpath)
                 occ_list[occ_list.index(enemy.locationarray)] = bestmove
             enemy_completedmovement = False
-            print(occ_list)
 
         # update the colours of highlighted moves
         step += 1
@@ -331,46 +331,67 @@ if __name__ == '__main__':
 
         # this if statement will animate all enemies from one location to another.
         if not enemy_completedmovement:
-            enemy_move_draw_list = enemy_event_list[0]
-            current_enemy = enemylist[len(enemylist) - len(enemy_event_list)]
-            if enemy_move_draw_list[0] == current_enemy.locationarray:
-                enemy_move_draw_list.pop(0)
-                if len(enemy_move_draw_list) == 0:
-                    enemy_event_list.pop(0)
-                    if len(enemy_event_list) == 0:
-                        enemy_completedmovement = True  # tell the program the animation is completed.
+            if len(enemylist) != 0:
+                enemy_move_draw_list = enemy_event_list[0]
+                current_enemy = enemylist[len(enemylist) - len(enemy_event_list)]
+                if enemy_move_draw_list[0] == current_enemy.locationarray:
+                    enemy_move_draw_list.pop(0)
+                    if len(enemy_move_draw_list) == 0:
+                        enemy_event_list.pop(0)
+                        if len(enemy_event_list) == 0:
+                            enemy_completedmovement = True  # tell the program the animation is completed.
 
-                        # new movables are calculated for player.
-                        occ_list.remove(player.locationarray)
-                        current_land_movable = pm.calculatelandmovable(worldnum, player.movementspeed,
-                                                                       player.locationarray, occ_list)
-                        current_water_movable = pm.calculatewatermovable(worldnum, player.movementspeed,
-                                                                         player.locationarray, occ_list)
-                        occ_list.append(player.locationarray)
+                            # here, the new attacks are calculated for player.
+                            current_all_attackable = aa.calculate_melee(player.locationarray, player.reach, occ_list)
 
-                        # finally, end the turn.
-                        tb.turnend(True)
+                            # new movables are calculated for player.
+                            occ_list.remove(player.locationarray)
+                            current_land_movable = pm.calculatelandmovable(worldnum, player.movementspeed,
+                                                                           player.locationarray, occ_list)
+                            current_water_movable = pm.calculatewatermovable(worldnum, player.movementspeed,
+                                                                             player.locationarray, occ_list)
+                            occ_list.append(player.locationarray)
+
+                            # finally, end the turn.
+                            tb.turnend(True)
+                else:
+                    pos_x = enemy_move_draw_list[0][0]
+                    pos_y = enemy_move_draw_list[0][1]
+                    if current_enemy.locationarray[0] != pos_x:
+                        if current_enemy.locationarray[0] - pos_x > 0:
+                            enemy_tempaddx -= draw_move_speed
+                        else:
+                            enemy_tempaddx += draw_move_speed
+                        if current_enemy.rect.x == pos_x * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
+                                (levelblocksize - 20) / 2):
+                            current_enemy.locationarray[0] = pos_x
+                            enemy_tempaddx = 0
+                    if current_enemy.locationarray[1] != pos_y:
+                        if current_enemy.locationarray[1] - pos_y > 0:
+                            enemy_tempaddy -= draw_move_speed
+                        else:
+                            enemy_tempaddy += draw_move_speed
+                        if current_enemy.rect.y == pos_y * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + (
+                                (levelblocksize - 20) / 2):
+                            current_enemy.locationarray[1] = pos_y
+                            enemy_tempaddy = 0
             else:
-                pos_x = enemy_move_draw_list[0][0]
-                pos_y = enemy_move_draw_list[0][1]
-                if current_enemy.locationarray[0] != pos_x:
-                    if current_enemy.locationarray[0] - pos_x > 0:
-                        enemy_tempaddx -= draw_move_speed
-                    else:
-                        enemy_tempaddx += draw_move_speed
-                    if current_enemy.rect.x == pos_x * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
-                            (levelblocksize - 20) / 2):
-                        current_enemy.locationarray[0] = pos_x
-                        enemy_tempaddx = 0
-                if current_enemy.locationarray[1] != pos_y:
-                    if current_enemy.locationarray[1] - pos_y > 0:
-                        enemy_tempaddy -= draw_move_speed
-                    else:
-                        enemy_tempaddy += draw_move_speed
-                    if current_enemy.rect.y == pos_y * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + (
-                            (levelblocksize - 20) / 2):
-                        current_enemy.locationarray[1] = pos_y
-                        enemy_tempaddy = 0
+                enemy_completedmovement = True  # tell the program the animation is completed.
+
+                # here, the new attacks are calculated for player.
+                current_all_attackable = aa.calculate_melee(player.locationarray, player.reach, occ_list)
+
+                # new movables are calculated for player.
+                occ_list.remove(player.locationarray)
+                current_land_movable = pm.calculatelandmovable(worldnum, player.movementspeed,
+                                                               player.locationarray, occ_list)
+                current_water_movable = pm.calculatewatermovable(worldnum, player.movementspeed,
+                                                                 player.locationarray, occ_list)
+                occ_list.append(player.locationarray)
+
+                # finally, end the turn.
+                tb.turnend(True)
+
 
         # print all sprites on the list
         screen.blit(detsans_normal.render("Turn Number: " + str(m.ceil(tb.turnnumber / 4)), False, WHITE), [10, 10])
