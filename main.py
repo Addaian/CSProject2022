@@ -1,6 +1,7 @@
 import glob
 import itertools
 import math as m
+import time as t
 import random
 
 import pygame
@@ -131,7 +132,7 @@ if __name__ == '__main__':
     occ_list.append(player.locationarray)  # the space the player is on is now unavailable for future spawns and moves.
 
     # using this for loop, spawn an initial 5 enemies into first world.
-    for i in range(5):
+    for i in range(7):
         enemy_instance = ea.EnemyClass(worldnum, occ_list)
         occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
         enemylist.append(enemy_instance)  # used to update all enemies
@@ -354,6 +355,7 @@ if __name__ == '__main__':
 
                             # finally, end the turn.
                             tb.turnend(True)
+                        t.sleep(0.25)
                 else:
                     pos_x = enemy_move_draw_list[0][0]
                     pos_y = enemy_move_draw_list[0][1]
@@ -392,7 +394,6 @@ if __name__ == '__main__':
                 # finally, end the turn.
                 tb.turnend(True)
 
-
         # print all sprites on the list
         screen.blit(detsans_normal.render("Turn Number: " + str(m.ceil(tb.turnnumber / 4)), False, WHITE), [10, 10])
 
@@ -418,7 +419,18 @@ if __name__ == '__main__':
                 screen.blit(detsans_large.render("Red Blit", False, WHITE), [920, 80])
                 ea.drawhealth(screen, detsans_normal, enemy.health)
                 ea.drawattack(screen, detsans_normal, enemy.attack)
-
+        # a loop that detects if the mouse is hovering over the map.
+        # if yes, then draw the type on bottom of screen
+        for y in range(len(levelblocklist)):
+            for x in range(len(levelblocklist)):
+                blocksurface = pygame.Surface([levelblocksize, levelblocksize])
+                if pygame.Rect.collidepoint(blocksurface.get_rect(topleft=[blockloc_x(x), blockloc_y(y)]), pygame.mouse.get_pos()):
+                    if levelblocklist[y][x] == "#":
+                        screen.blit(detsans_normal.render("Land", False, WHITE), [372, 630])
+                    elif levelblocklist[y][x] == "_":
+                        screen.blit(detsans_normal.render("Water", False, WHITE), [372, 630])
+                    else:
+                        screen.blit(detsans_normal.render("Wall", False, WHITE), [372, 630])
         # update the screen.
         pygame.display.flip()
         # Limit to 60 frames per second
