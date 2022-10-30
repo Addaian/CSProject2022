@@ -23,6 +23,7 @@ class EnemyClass(pygame.sprite.Sprite):
         self.health = random.randint(3, 5)
         self.attack = random.randint(1, 2)
         self.awareness_radius = 4  # determines the distance at which the enemy will become aware of the player.
+        self.attack_timer = 1
 
     def updatelocation(self, locx, locy):
         self.locationarray[0] = locx

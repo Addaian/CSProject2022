@@ -25,3 +25,37 @@ def drawattack(screen, worldnum, landcol, watercol, locx, locy, attack_list):
         elif worldarray[x[1]][x[0]] == "_":
             pygame.draw.rect(screen, watercol, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize])
             pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize], 1, 1)
+
+
+# needed to define certain information about an attack. Is not pygame sprite as no need to draw this class.
+class Attack:
+    def __init__(self, location, timer, damage):
+        self.timer = timer  # this will determine when the attack will finish
+        self.damage = damage  # determines the damage
+        self.location = location  # the location of the attack on a tile.
+        self.range = 1  # the range of which the attack will reach (eg. 1 square to 1 direction)
+
+
+def enemy_attack(worldnum, attack_list, enemy_location, player_location, attack_timer, damage):
+    worldarray = wc.read(worldnum)
+    distance = abs(player_location[0] - enemy_location[0]) + abs(player_location[1] - enemy_location[1])
+    if distance == 1:
+        new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage)
+        return new_attack
+    elif distance > 1:
+        temporary_list = []
+        final_list = []
+        if 0 <= enemy_location[0] + 1 <= 8:
+            temporary_list.append([enemy_location[0] + 1, enemy_location[1]])
+        if 0 <= enemy_location[0] - 1 <= 8:
+            temporary_list.append([enemy_location[0] - 1, enemy_location[1]])
+        if 0 <= enemy_location[1] + 1 <= 8:
+            temporary_list.append([enemy_location[0], enemy_location[1] + 1])
+        if 0 <= enemy_location[1] - 1 <= 8:
+            temporary_list.append([enemy_location[0], enemy_location[1] - 1])
+        for element in temporary_list:
+            if worldarray[element[1]][element[0]] != "^":
+                final_list.append(element)
+        new_attack = Attack(random.choice(final_list), attack_timer, damage)
+        return new_attack
+

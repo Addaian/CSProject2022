@@ -109,11 +109,14 @@ def findbestmove(awareness_radius, player_location, self_location, movable_list,
                     shortest_path = (abs(player_location[0] - i[0]) + abs(player_location[1] - i[1]))
                     bestmove = i
         # we can make this action a little less predictable and mundane by making it do so only 80% of the time.
-        if random.randint(1, 10) <= 2:
+        rand = random.randint(1, 10)
+        if rand <= 2:
             bestmove = random.choice(movable_list)
             if bestmove in occ_list:
                 while bestmove in occ_list:
                     bestmove = random.choice(movable_list)
+        if rand == 3:  # for fun - might just stay still.
+            bestmove = self_location
         return bestmove
     elif total_dist > awareness_radius:
         # just returns any value in movable list.
@@ -121,4 +124,6 @@ def findbestmove(awareness_radius, player_location, self_location, movable_list,
         if bestmove in occ_list:
             while bestmove in occ_list:
                 bestmove = random.choice(movable_list)
+            if random.randint(1, 10) <= 2:
+                bestmove = self_location  # again - for fun - just make the enemy stay still 20% of the time.
         return bestmove

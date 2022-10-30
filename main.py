@@ -80,6 +80,8 @@ worldnum = 0  # world number - the unique identifier of a world in a floor.
 difficulty = 2  # difficulty - 1 - easy, 2 - medium, 3 - hard, 4 - ironmode (1 health cap)
 draw_move_speed = 10  # drawn 2 px at a time. This is for objects that are animated through the tiles.
 occ_list = []  # this list is used to notate all tiles that are currently occupied or cannot be moved to.
+attack_list = []  # this list is used to notate a tile that is about to be attacked.
+# additional info: the tile will finish being attacked before the next enemy movement. Other attacks will have a longer time to finish.
 
 
 # global functions
@@ -110,6 +112,12 @@ def find_mouse_location(dimension):
         return int((pygame.mouse.get_pos()[1] - (screen.get_height() - levelblocksize * 9) / 2) // levelblocksize)
     else:
         return 0
+
+
+def draw_rect_alpha(surface, color, rect):  # this function will draw a transparent rectangle.
+    shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+    pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+    surface.blit(shape_surf, rect)
 
 
 # fonts
@@ -222,18 +230,19 @@ if __name__ == '__main__':
             for x in range(len(levelblocklist)):
                 if levelblocklist[y][x] == "#":
                     pygame.draw.rect(screen, GRAY, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
-                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1,
-                                     1)
                 elif levelblocklist[y][x] == "_":
                     pygame.draw.rect(screen, BLUE,
                                      [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
-                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1,
-                                     1)
                 else:
                     pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
+                pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1, 1)
 
         # enemy movement for loop
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Movement" and enemy_completedmove:
+            while len(attack_list) != 0:
+                if attack_list[0].location == player.locationarray:
+                    player.health -= attack_list[0].damage
+                attack_list.pop()
             enemy_event_list = []  # this list will be iterated and animated.
             for enemy in enemylist:
                 enemy_movable_list = []  # this list will have all possible moves for the enemy to choose from.
@@ -252,6 +261,14 @@ if __name__ == '__main__':
                 enemy_event_list.append(best_path)
                 occ_list[occ_list.index(enemy.locationarray)] = best_move
             enemy_completedmove = False
+
+        if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Attack" and enemy_completedmove:
+            if len(enemylist) > 0:
+                for enemy in enemylist:
+                    attack_instance = aa.enemy_attack(worldnum, attack_list, enemy.locationarray, player.locationarray, enemy.attack_timer, enemy.attack)
+                    if attack_instance is not None:
+                        attack_list.append(attack_instance)
+            tb.turnend(True)
 
         # update the colours of highlighted moves
         step += 1
@@ -421,6 +438,14 @@ if __name__ == '__main__':
                 screen.blit(detsans_large.render("Red Blit", False, WHITE), [920, 80])
                 ea.drawhealth(screen, detsans_normal, enemy.health)
                 ea.drawattack(screen, detsans_normal, enemy.attack)
+
+        # a loop that detects if there are any impending enemy attacks.
+        # if yes, then draw the attack transparently.
+        if len(attack_list) > 0:
+            for attack in attack_list:
+                draw_rect_alpha(screen, (255, 69, 0, 127), (blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize))
+                pygame.draw.rect(screen, BLACK, [blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize], 1, 1)
+
         # a loop that detects if the mouse is hovering over the map.
         # if yes, then draw the type on bottom of screen
         for y in range(len(levelblocklist)):
