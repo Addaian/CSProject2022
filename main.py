@@ -155,6 +155,9 @@ if __name__ == '__main__':
 
     all_sprites_list.add(player)  # used to draw both player and enemy at the end of the loop.
 
+    skip_button = pygame.image.load("images/skip_button.jpg")
+    skip_button.convert()  # button sprite.
+
     # movement variables
     player_completedmove = True
     player_move_draw_list = []
@@ -191,6 +194,9 @@ if __name__ == '__main__':
                 break
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
+                    if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
+                        tb.skipturn()
+                        break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
                     if 0 <= pos_x <= 8 and 0 <= pos_y <= 8:
@@ -207,6 +213,9 @@ if __name__ == '__main__':
                             # then hops over to move animation if statement.
 
                 if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmove:
+                    if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
+                        tb.skipturn()
+                        break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
                     if [pos_x, pos_y] in current_in_range:
@@ -250,7 +259,6 @@ if __name__ == '__main__':
                 enemy_movable_list.extend(em.calculatelandmovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
                 enemy_movable_list.extend(em.calculatewatermovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
                 occ_list.append(enemy.locationarray)
-
                 best_move = em.findbestmove(enemy.awareness_radius, player.locationarray, enemy.locationarray, enemy_movable_list, occ_list)
                 # after finding all final locations of all enemies on screen, we can find the best path of all moves.
 
@@ -374,7 +382,7 @@ if __name__ == '__main__':
 
                             # finally, end the turn.
                             tb.turnend(True)
-                        t.sleep(0.25)
+                        t.sleep(0.25)  # to add a buffer between each movement - this makes it more intuitive
                 else:
                     pos_x = enemy_move_draw_list[0][0]
                     pos_y = enemy_move_draw_list[0][1]
@@ -418,11 +426,14 @@ if __name__ == '__main__':
 
         screen.blit(detsans_normal.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
 
-        if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
-            pm.drawlandmove(screen, current_land_color, blockloc_x, blockloc_y, current_land_movable)
-            pm.drawwatermove(screen, current_water_color, blockloc_x, blockloc_y, current_water_movable)
+        if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement":
+            screen.blit(skip_button, [790, 635])
+            if player_completedmove:
+                pm.drawlandmove(screen, current_land_color, blockloc_x, blockloc_y, current_land_movable)
+                pm.drawwatermove(screen, current_water_color, blockloc_x, blockloc_y, current_water_movable)
 
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack":
+            screen.blit(skip_button, [790, 635])
             aa.drawattack(screen, worldnum, current_attack_land_color, current_attack_water_color, blockloc_x,
                           blockloc_y, current_in_range)
 
@@ -458,6 +469,10 @@ if __name__ == '__main__':
                         screen.blit(detsans_normal.render("Water", False, WHITE), [372, 630])
                     else:
                         screen.blit(detsans_normal.render("Wall", False, WHITE), [372, 630])
+
+        # DEBUG DEBUG DEBUG
+        screen.blit(detsans_normal.render("X coord: " + str(pygame.mouse.get_pos()[0]), False, WHITE), [20, 650])
+        screen.blit(detsans_normal.render("Y coord: " + str(pygame.mouse.get_pos()[1]), False, WHITE), [20, 680])
         # update the screen.
         pygame.display.flip()
         # Limit to 60 frames per second

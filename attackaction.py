@@ -42,7 +42,7 @@ def enemy_attack(worldnum, attack_list, enemy_location, player_location, attack_
     if distance == 1:
         new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage)
         return new_attack
-    elif distance > 1:
+    elif distance == 2:
         temporary_list = []
         final_list = []
         if 0 <= enemy_location[0] + 1 <= 8:
