@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     all_sprites_list.add(player)  # used to draw both player and enemy at the end of the loop.
 
-    skip_button = pygame.image.load("images/skip_button.jpg")
+    skip_button = pygame.image.load("images/skip_button.png")
     skip_button.convert()  # button sprite.
 
     # movement variables
