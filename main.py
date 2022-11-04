@@ -81,6 +81,10 @@ difficulty = 2  # difficulty - 1 - easy, 2 - medium, 3 - hard, 4 - ironmode (1 h
 draw_move_speed = 10  # drawn 2 px at a time. This is for objects that are animated through the tiles.
 occ_list = []  # this list is used to notate all tiles that are currently occupied or cannot be moved to.
 attack_list = []  # this list is used to notate a tile that is about to be attacked.
+
+has_drawn_splash = False  # this bool will ask every start of turn if the splash indicator has been drawn.
+draw_splash_alpha = 256
+
 # additional info: the tile will finish being attacked before the next enemy movement. Other attacks will have a longer time to finish.
 
 
@@ -94,9 +98,11 @@ def remove_redundancy(listofcoords):
             listofcoords) - 2:  # this while loop will loop the array and find out if there are redundant paths.
         if len(listofcoords) != 0:
             for z1 in range(temporarystart + 2, len(listofcoords)):  # finds out the next redundant
-                if abs(listofcoords[temporarystart][0] - listofcoords[z1][0]) == 1 and listofcoords[temporarystart][1] == listofcoords[z1][1]:
+                if abs(listofcoords[temporarystart][0] - listofcoords[z1][0]) == 1 and listofcoords[temporarystart][
+                    1] == listofcoords[z1][1]:
                     temporaryvar = z1
-                elif abs(listofcoords[temporarystart][1] - listofcoords[z1][1]) == 1 and listofcoords[temporarystart][0] == listofcoords[z1][0]:
+                elif abs(listofcoords[temporarystart][1] - listofcoords[z1][1]) == 1 and listofcoords[temporarystart][
+                    0] == listofcoords[z1][0]:
                     temporaryvar = z1
             if temporaryvar > 0:
                 listofcoords = listofcoords[:temporarystart + 1] + listofcoords[temporaryvar:]
@@ -123,6 +129,7 @@ def draw_rect_alpha(surface, color, rect):  # this function will draw a transpar
 # fonts
 detsans_normal = pygame.font.Font("fonts/detsans.ttf", 30)
 detsans_large = pygame.font.Font("fonts/detsans.ttf", 60)
+detsans_super_large = pygame.font.Font("fonts/detsans.ttf", 120)
 
 if __name__ == '__main__':
     # globals
@@ -147,7 +154,7 @@ if __name__ == '__main__':
     occ_list.append(player.locationarray)  # the space the player is on is now unavailable for future spawns and moves.
 
     # using this for loop, spawn an initial 5 enemies into first world.
-    for i in range(7):
+    for i in range(int(m.ceil(difficulty * 3.5))):
         enemy_instance = ea.EnemyClass(worldnum, occ_list)
         occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
         enemylist.append(enemy_instance)  # used to update all enemies
@@ -193,9 +200,11 @@ if __name__ == '__main__':
                 done = True
                 break
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
+                if event.button == 1 and tb.turntitle[
+                    (tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
                     if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
                         tb.skipturn()
+                        has_drawn_splash = False
                         break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
@@ -212,9 +221,11 @@ if __name__ == '__main__':
                             occ_list[occ_list.index(player.locationarray)] = [pos_x, pos_y]
                             # then hops over to move animation if statement.
 
-                if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmove:
+                if event.button == 1 and tb.turntitle[
+                    (tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmove:
                     if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
                         tb.skipturn()
+                        has_drawn_splash = False
                         break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
@@ -228,11 +239,13 @@ if __name__ == '__main__':
                                 occ_list.remove(enemy.locationarray)
                                 del enemy
                         tb.turnend(True)
+                        has_drawn_splash = False
                         aa.calculate_melee(player.locationarray, player.reach, occ_list)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     tb.turnend(True)
+                    has_drawn_splash = False
 
         # blit all the squares on the level
         for y in range(len(levelblocklist)):
@@ -256,14 +269,18 @@ if __name__ == '__main__':
             for enemy in enemylist:
                 enemy_movable_list = []  # this list will have all possible moves for the enemy to choose from.
                 occ_list.remove(enemy.locationarray)
-                enemy_movable_list.extend(em.calculatelandmovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
-                enemy_movable_list.extend(em.calculatewatermovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
+                enemy_movable_list.extend(
+                    em.calculatelandmovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
+                enemy_movable_list.extend(
+                    em.calculatewatermovable(worldnum, enemy.movementspeed, enemy.locationarray, occ_list))
                 occ_list.append(enemy.locationarray)
-                best_move = em.findbestmove(enemy.awareness_radius, player.locationarray, enemy.locationarray, enemy_movable_list, occ_list)
+                best_move = em.findbestmove(enemy.awareness_radius, player.locationarray, enemy.locationarray,
+                                            enemy_movable_list, occ_list)
                 # after finding all final locations of all enemies on screen, we can find the best path of all moves.
 
                 occ_list.remove(enemy.locationarray)
-                best_path = enemy.findbestpath(worldnum, enemy.movementspeed, enemy.locationarray, best_move, [], occ_list)
+                best_path = enemy.findbestpath(worldnum, enemy.movementspeed, enemy.locationarray, best_move, [],
+                                               occ_list)
                 occ_list.append(enemy.locationarray)
 
                 enemy_event_list.append(best_path)
@@ -273,7 +290,8 @@ if __name__ == '__main__':
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Attack" and enemy_completedmove:
             if len(enemylist) > 0:
                 for enemy in enemylist:
-                    attack_instance = aa.enemy_attack(worldnum, attack_list, enemy.locationarray, player.locationarray, enemy.attack_timer, enemy.attack)
+                    attack_instance = aa.enemy_attack(worldnum, attack_list, enemy.locationarray, player.locationarray,
+                                                      enemy.attack_timer, enemy.attack)
                     if attack_instance is not None:
                         attack_list.append(attack_instance)
             tb.turnend(True)
@@ -314,12 +332,14 @@ if __name__ == '__main__':
 
         # update enemy sprites
         for i in range(len(enemylist)):
-            enemylist[i].rect.x = enemylist[i].locationarray[0] * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
-                    (levelblocksize - 20) / 2)
+            enemylist[i].rect.x = enemylist[i].locationarray[0] * levelblocksize + (
+                        screen.get_width() - levelblocksize * 9) / 2 + (
+                                          (levelblocksize - 20) / 2)
             if i == len(enemylist) - len(enemy_event_list):
                 enemylist[i].rect.x += enemy_tempaddx
-            enemylist[i].rect.y = enemylist[i].locationarray[1] * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + (
-                    (levelblocksize - 20) / 2)
+            enemylist[i].rect.y = enemylist[i].locationarray[1] * levelblocksize + (
+                        screen.get_height() - levelblocksize * 9) / 2 + (
+                                          (levelblocksize - 20) / 2)
             if i == len(enemylist) - len(enemy_event_list):
                 enemylist[i].rect.y += enemy_tempaddy
 
@@ -335,6 +355,7 @@ if __name__ == '__main__':
 
                     # end the turn.
                     tb.turnend(True)
+                    has_drawn_splash = False
             else:
                 pos_x = player_move_draw_list[0][0]
                 pos_y = player_move_draw_list[0][1]
@@ -382,7 +403,7 @@ if __name__ == '__main__':
 
                             # finally, end the turn.
                             tb.turnend(True)
-                        t.sleep(0.25)  # to add a buffer between each movement - this makes it more intuitive
+                            has_drawn_splash = False
                 else:
                     pos_x = enemy_move_draw_list[0][0]
                     pos_y = enemy_move_draw_list[0][1]
@@ -391,7 +412,8 @@ if __name__ == '__main__':
                             enemy_tempaddx -= draw_move_speed
                         else:
                             enemy_tempaddx += draw_move_speed
-                        if current_enemy.rect.x == pos_x * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
+                        if current_enemy.rect.x == pos_x * levelblocksize + (
+                                screen.get_width() - levelblocksize * 9) / 2 + (
                                 (levelblocksize - 20) / 2):
                             current_enemy.locationarray[0] = pos_x
                             enemy_tempaddx = 0
@@ -400,7 +422,8 @@ if __name__ == '__main__':
                             enemy_tempaddy -= draw_move_speed
                         else:
                             enemy_tempaddy += draw_move_speed
-                        if current_enemy.rect.y == pos_y * levelblocksize + (screen.get_height() - levelblocksize * 9) / 2 + (
+                        if current_enemy.rect.y == pos_y * levelblocksize + (
+                                screen.get_height() - levelblocksize * 9) / 2 + (
                                 (levelblocksize - 20) / 2):
                             current_enemy.locationarray[1] = pos_y
                             enemy_tempaddy = 0
@@ -420,6 +443,7 @@ if __name__ == '__main__':
 
                 # finally, end the turn.
                 tb.turnend(True)
+                has_drawn_splash = False
 
         # print all sprites on the list
         screen.blit(detsans_normal.render("Turn Number: " + str(m.ceil(tb.turnnumber / 4)), False, WHITE), [10, 10])
@@ -437,9 +461,6 @@ if __name__ == '__main__':
             aa.drawattack(screen, worldnum, current_attack_land_color, current_attack_water_color, blockloc_x,
                           blockloc_y, current_in_range)
 
-        pa.drawhealth(screen, detsans_normal, player.health)
-        pa.drawattack(screen, detsans_normal, player.attack)
-
         all_sprites_list.draw(screen)
 
         # a loop that detects if the mouse is hovering on an enemy instance.
@@ -447,22 +468,37 @@ if __name__ == '__main__':
         for enemy in enemylist:
             if enemy.rect.collidepoint(pygame.mouse.get_pos()):
                 screen.blit(detsans_large.render("Red Blit", False, WHITE), [920, 80])
+                for attack in attack_list:
+                    if attack.origin == enemy.locationarray:
+                        screen.blit(detsans_normal.render("Attacking: " + str(attack.location), False, WHITE),
+                                    [920, 210])
                 ea.drawhealth(screen, detsans_normal, enemy.health)
                 ea.drawattack(screen, detsans_normal, enemy.attack)
+
+        # a loop that detects if the mouse is hovering on the player.
+        # if yes, then draw the attributes of player on left side of screen
+        if player.rect.collidepoint(pygame.mouse.get_pos()):
+            screen.blit(detsans_large.render("Player", False, WHITE), [180, 80])
+            pa.drawhealth(screen, detsans_normal, player.health)
+            pa.drawattack(screen, detsans_normal, player.attack)
 
         # a loop that detects if there are any impending enemy attacks.
         # if yes, then draw the attack transparently.
         if len(attack_list) > 0:
             for attack in attack_list:
-                draw_rect_alpha(screen, (255, 69, 0, 127), (blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize))
-                pygame.draw.rect(screen, BLACK, [blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize], 1, 1)
+                draw_rect_alpha(screen, (255, 69, 0, 127), (
+                blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize))
+                pygame.draw.rect(screen, BLACK,
+                                 [blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize,
+                                  levelblocksize], 1, 1)
 
         # a loop that detects if the mouse is hovering over the map.
         # if yes, then draw the type on bottom of screen
         for y in range(len(levelblocklist)):
             for x in range(len(levelblocklist)):
                 block_surface = pygame.Surface([levelblocksize, levelblocksize])
-                if pygame.Rect.collidepoint(block_surface.get_rect(topleft=[blockloc_x(x), blockloc_y(y)]), pygame.mouse.get_pos()):
+                if pygame.Rect.collidepoint(block_surface.get_rect(topleft=[blockloc_x(x), blockloc_y(y)]),
+                                            pygame.mouse.get_pos()):
                     if levelblocklist[y][x] == "#":
                         screen.blit(detsans_normal.render("Land", False, WHITE), [372, 630])
                     elif levelblocklist[y][x] == "_":
@@ -470,7 +506,25 @@ if __name__ == '__main__':
                     else:
                         screen.blit(detsans_normal.render("Wall", False, WHITE), [372, 630])
 
+        # this block of code will make the splash text at the start of every turn fade out.
+        turn_change_splash_text = detsans_super_large.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE)
+        surf_splash_screen = pygame.Surface(turn_change_splash_text.get_rect().size)
+        surf_splash_screen.set_colorkey((1, 1, 1))
+        surf_splash_screen.fill((1, 1, 1))
+        surf_splash_screen.blit(turn_change_splash_text, (0, 0))
+
+        # blit at the end so that it will supercede all other surfaces
+        if not has_drawn_splash:
+            draw_splash_alpha = (draw_splash_alpha - 4)
+            surf_splash_screen.set_alpha(draw_splash_alpha)
+            screen.blit(surf_splash_screen, ((screen.get_width() - surf_splash_screen.get_width()) / 2, (screen.get_height() - surf_splash_screen.get_height()) / 2))
+            if draw_splash_alpha == 0:
+                draw_splash_alpha = 256
+                has_drawn_splash = True
+
         # DEBUG DEBUG DEBUG
+        screen.blit(detsans_normal.render("done_splash_text: " + str(has_drawn_splash), False, WHITE), [20, 590])
+        screen.blit(detsans_normal.render("Player coord: " + str(player.locationarray), False, WHITE), [20, 620])
         screen.blit(detsans_normal.render("X coord: " + str(pygame.mouse.get_pos()[0]), False, WHITE), [20, 650])
         screen.blit(detsans_normal.render("Y coord: " + str(pygame.mouse.get_pos()[1]), False, WHITE), [20, 680])
         # update the screen.

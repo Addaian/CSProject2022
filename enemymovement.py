@@ -124,6 +124,6 @@ def findbestmove(awareness_radius, player_location, self_location, movable_list,
         if bestmove in occ_list:
             while bestmove in occ_list:
                 bestmove = random.choice(movable_list)
-            if random.randint(1, 10) <= 2:
-                bestmove = self_location  # again - for fun - just make the enemy stay still 20% of the time.
+            if random.randint(1, 10) == 1:
+                bestmove = self_location  # again - for fun - just make the enemy stay still 10% of the time.
         return bestmove

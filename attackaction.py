@@ -29,18 +29,19 @@ def drawattack(screen, worldnum, landcol, watercol, locx, locy, attack_list):
 
 # needed to define certain information about an attack. Is not pygame sprite as no need to draw this class.
 class Attack:
-    def __init__(self, location, timer, damage):
+    def __init__(self, location, timer, damage, enemy_location):
         self.timer = timer  # this will determine when the attack will finish
         self.damage = damage  # determines the damage
         self.location = location  # the location of the attack on a tile.
         self.range = 1  # the range of which the attack will reach (eg. 1 square to 1 direction)
+        self.origin = enemy_location  # this is to tie the attack to an enemy
 
 
 def enemy_attack(worldnum, attack_list, enemy_location, player_location, attack_timer, damage):
     worldarray = wc.read(worldnum)
     distance = abs(player_location[0] - enemy_location[0]) + abs(player_location[1] - enemy_location[1])
     if distance == 1:
-        new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage)
+        new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage, enemy_location)
         return new_attack
     elif distance == 2:
         temporary_list = []
@@ -56,6 +57,6 @@ def enemy_attack(worldnum, attack_list, enemy_location, player_location, attack_
         for element in temporary_list:
             if worldarray[element[1]][element[0]] != "^":
                 final_list.append(element)
-        new_attack = Attack(random.choice(final_list), attack_timer, damage)
+        new_attack = Attack(random.choice(final_list), attack_timer, damage, enemy_location)
         return new_attack
 

@@ -140,12 +140,12 @@ class PlayerClass(pygame.sprite.Sprite):
 
 
 def drawhealth(screen, font, health_value):
-    screen.blit(font.render("Health: ", False, mn.WHITE), [10, 70])
+    screen.blit(font.render("Health:", False, mn.WHITE), [180, 145])
     for i in range(health_value):
-        pygame.draw.rect(screen, mn.WHITE, [100 + i * 15, 75, 10, 22])
+        pygame.draw.rect(screen, mn.WHITE, [270 + i * 15, 150, 10, 22])
 
 
 def drawattack(screen, font, attack_value):
-    screen.blit(font.render("Attack: ", False, mn.WHITE), [10, 100])
+    screen.blit(font.render("Attack: ", False, mn.WHITE), [180, 175])
     for i in range(attack_value):
-        pygame.draw.rect(screen, mn.RED, [100 + i * 15, 105, 10, 22])
+        pygame.draw.rect(screen, mn.RED, [270 + i * 15, 180, 10, 22])
