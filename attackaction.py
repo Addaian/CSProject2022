@@ -31,30 +31,101 @@ class Attack:
         self.timer = timer  # this will determine when the attack will finish
         self.damage = damage  # determines the damage
         self.location = location  # the location of the attack on a tile.
-        self.range = 1  # the range of which the attack will reach (eg. 1 square to 1 direction)
+        self.range = 1  # the range of which the attack will reach (eg: 1 square to 1 direction)
         self.origin = enemy_location  # this is to tie the attack to an enemy
 
 
-def enemy_attack(worldnum, attack_list, enemy_location, player_location, attack_timer, damage):
+def enemy_attack(worldnum, enemy_class, enemy_location, player_location, attack_timer, damage):
     worldarray = wc.read(worldnum)
     distance = abs(player_location[0] - enemy_location[0]) + abs(player_location[1] - enemy_location[1])
-    if distance == 1:
-        new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage, enemy_location)
-        return new_attack
-    elif distance == 2:
-        temporary_list = []
-        final_list = []
-        if 0 <= enemy_location[0] + 1 <= 8:
-            temporary_list.append([enemy_location[0] + 1, enemy_location[1]])
-        if 0 <= enemy_location[0] - 1 <= 8:
-            temporary_list.append([enemy_location[0] - 1, enemy_location[1]])
-        if 0 <= enemy_location[1] + 1 <= 8:
-            temporary_list.append([enemy_location[0], enemy_location[1] + 1])
-        if 0 <= enemy_location[1] - 1 <= 8:
-            temporary_list.append([enemy_location[0], enemy_location[1] - 1])
-        for element in temporary_list:
-            if worldarray[element[1]][element[0]] != "^":
-                final_list.append(element)
-        new_attack = Attack(random.choice(final_list), attack_timer, damage, enemy_location)
-        return new_attack
+    y_direct = player_location[1] - enemy_location[1]
+    x_direct = player_location[0] - enemy_location[0]
+    if enemy_class == "BasicEnemy":
+        if distance == 1:
+            new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage, enemy_location)
+            return new_attack
+        elif distance == 2:
+            temporary_list = []
+            final_list = []
+            if 0 <= enemy_location[0] + 1 <= 8:
+                temporary_list.append([enemy_location[0] + 1, enemy_location[1]])
+            if 0 <= enemy_location[0] - 1 <= 8:
+                temporary_list.append([enemy_location[0] - 1, enemy_location[1]])
+            if 0 <= enemy_location[1] + 1 <= 8:
+                temporary_list.append([enemy_location[0], enemy_location[1] + 1])
+            if 0 <= enemy_location[1] - 1 <= 8:
+                temporary_list.append([enemy_location[0], enemy_location[1] - 1])
+            for element in temporary_list:
+                if worldarray[element[1]][element[0]] != "^":
+                    final_list.append(element)
+            new_attack = Attack(random.choice(final_list), attack_timer, damage, enemy_location)
+            return new_attack
+    elif enemy_class == "RookEnemy":
+        if distance == 1:
+            attack_list = []
+            not_hit_obstacle = True
+            new_attack = Attack([player_location[0], player_location[1]], attack_timer, damage, enemy_location)
+            attack_list.append(new_attack)
+            if abs(x_direct) == 1:
+                while not_hit_obstacle:
+                    if 0 <= player_location[0] + x_direct <= 8:
+                        if worldarray[player_location[1]][player_location[0] + x_direct] != "^":
+                            new_attack = Attack([player_location[0] + x_direct, player_location[1]], attack_timer, damage, enemy_location)
+                            attack_list.append(new_attack)
+                            if x_direct < 0:
+                                x_direct -= 1
+                            else:
+                                x_direct += 1
+                        else:
+                            not_hit_obstacle = False
+                    else:
+                        not_hit_obstacle = False
+                return attack_list
+            else:
+                while not_hit_obstacle:
+                    if 0 <= player_location[1] + y_direct <= 8:
+                        if worldarray[player_location[1] + y_direct][player_location[0]] != "^":
+                            new_attack = Attack([player_location[0], player_location[1] + y_direct], attack_timer, damage, enemy_location)
+                            attack_list.append(new_attack)
+                            if y_direct < 0:
+                                y_direct -= 1
+                            else:
+                                y_direct += 1
+                        else:
+                            not_hit_obstacle = False
+                    else:
+                        not_hit_obstacle = False
+                return attack_list
+        elif distance > 1:
+            direction = random.choice([-1, 1])
+            axis = random.choice([0, 1])
+            attack_list = []
+            not_hit_obstacle = True
+            x_direct = enemy_location[0]
+            y_direct = enemy_location[1]
+            if axis == 0:
+                while not_hit_obstacle:
+                    x_direct += direction
+                    if 0 <= x_direct <= 8:
+                        if worldarray[y_direct][x_direct] != "^":
+                            new_attack = Attack([x_direct, y_direct], attack_timer, damage, enemy_location)
+                            attack_list.append(new_attack)
+                        else:
+                            not_hit_obstacle = False
+                    else:
+                        not_hit_obstacle = False
+                return attack_list
+            else:
+                while not_hit_obstacle:
+                    y_direct += direction
+                    if 0 <= y_direct <= 8:
+                        if worldarray[y_direct][x_direct] != "^":
+                            new_attack = Attack([x_direct, y_direct], attack_timer, damage, enemy_location)
+                            attack_list.append(new_attack)
+                        else:
+                            not_hit_obstacle = False
+                    else:
+                        not_hit_obstacle = False
+                return attack_list
+
 

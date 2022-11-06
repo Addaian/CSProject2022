@@ -12,6 +12,7 @@ class BasicEnemy(pygame.sprite.Sprite):
         super().__init__()
         # this inherits __init__ (from pygame)'s pre-programmed functions
         self.locationarray = [0, 0]
+        self.name = "Red Blit"
         # declare image and get the rect associated with it. Fill with colour gray.
         self.image = pygame.Surface([20, 20])
         self.rect = self.image.get_rect()
@@ -124,12 +125,14 @@ class BasicEnemy(pygame.sprite.Sprite):
         self.updatelocation(final_x, final_y)
 
 
-class RookEnemy(pygame.sprite.Sprite):
+class RookEnemy(BasicEnemy):
     def __init__(self, worldnum, occupied_list):
-        super.__init__(worldnum, occupied_list)
+        super().__init__(worldnum, occupied_list)
         self.awareness_radius = 100
+        self.name = "Orange Blit"
         self.attack = random.randint(2, 3)
         self.health = random.randint(2, 3)
+        self.image.fill(mn.LIGHT_ORANGE)
 
 
 
