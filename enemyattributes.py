@@ -7,7 +7,7 @@ import os
 import math as m
 
 
-class EnemyClass(pygame.sprite.Sprite):
+class BasicEnemy(pygame.sprite.Sprite):
     def __init__(self, worldnum, occupied_list):
         super().__init__()
         # this inherits __init__ (from pygame)'s pre-programmed functions
@@ -122,6 +122,15 @@ class EnemyClass(pygame.sprite.Sprite):
                 if [final_x, final_y] not in occupied_list:
                     done = True
         self.updatelocation(final_x, final_y)
+
+
+class RookEnemy(pygame.sprite.Sprite):
+    def __init__(self, worldnum, occupied_list):
+        super.__init__(worldnum, occupied_list)
+        self.awareness_radius = 100
+        self.attack = random.randint(2, 3)
+        self.health = random.randint(2, 3)
+
 
 
 def drawhealth(screen, font, health_value):

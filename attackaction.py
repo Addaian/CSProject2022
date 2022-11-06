@@ -20,11 +20,9 @@ def drawattack(screen, worldnum, landcol, watercol, locx, locy, attack_list):
     worldarray = wc.read(worldnum)
     for x in attack_list:
         if worldarray[x[1]][x[0]] == "#":
-            pygame.draw.rect(screen, landcol, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize])
-            pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize], 1, 1)
+            pygame.Surface.blit(screen, landcol, [locx(x[0])+1, locy(x[1])+1])
         elif worldarray[x[1]][x[0]] == "_":
-            pygame.draw.rect(screen, watercol, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize])
-            pygame.draw.rect(screen, mn.BLACK, [locx(x[0]), locy(x[1]), mn.levelblocksize, mn.levelblocksize], 1, 1)
+            pygame.Surface.blit(screen, watercol, [locx(x[0])+1, locy(x[1])+1])
 
 
 # needed to define certain information about an attack. Is not pygame sprite as no need to draw this class.

@@ -29,42 +29,26 @@ GRAY = (128, 128, 128)
 
 clock = pygame.time.Clock()
 
-# used for color wheel cycles
-
-landmovecolors = itertools.cycle([GRAY, YELLOW])
-
-land_base_color = next(landmovecolors)
-land_next_color = next(landmovecolors)
-current_land_color = land_base_color
-
-watermovecolors = itertools.cycle([BLUE, YELLOW])
-
-water_base_color = next(watermovecolors)
-water_next_color = next(watermovecolors)
-current_water_color = water_base_color
-# used to cycle between default colour and the yellow tint used to
-# signify move possibility. Only flashed on player movement phase.
-
-attackcolors_land = itertools.cycle([GRAY, RED])
-
-attack_land_base_color = next(attackcolors_land)
-attack_land_next_color = next(attackcolors_land)
-current_attack_land_color = attack_land_base_color
-
-attackcolors_water = itertools.cycle([BLUE, RED])
-
-attack_water_base_color = next(attackcolors_water)
-attack_water_next_color = next(attackcolors_water)
-current_attack_water_color = attack_water_base_color
-# we need both land and water as we need to cycle through the colors in the game loop.
-
 FPS = 60  # used for color wheel cycles and generally determines the FPS of the screen.
-change_every_x_seconds = 0.7  # how long it take for the color wheel to cycle from 1 color to another.
-number_of_steps = change_every_x_seconds * FPS
-step = 0.5
+step = 0
+switch_color_direction = False
 
 # level block size, and calculating the block locations on the screen per stage
 levelblocksize = 60
+
+# we need both land and water as we need to cycle through the colors in the game loop.
+
+attack_land_color = pygame.Surface([levelblocksize - 1, levelblocksize - 1])
+attack_land_color.fill(RED)
+
+attack_water_color = pygame.Surface([levelblocksize - 1, levelblocksize - 1])
+attack_water_color.fill(RED)
+
+current_land_color = pygame.Surface([levelblocksize - 1, levelblocksize - 1])
+current_land_color.fill(YELLOW)
+
+current_water_color = pygame.Surface([levelblocksize - 1, levelblocksize - 1])
+current_water_color.fill(YELLOW)
 
 
 def blockloc_x(var_x):
@@ -155,7 +139,7 @@ if __name__ == '__main__':
 
     # using this for loop, spawn an initial 5 enemies into first world.
     for i in range(int(m.ceil(difficulty * 3.5))):
-        enemy_instance = ea.EnemyClass(worldnum, occ_list)
+        enemy_instance = ea.BasicEnemy(worldnum, occ_list)
         occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
         enemylist.append(enemy_instance)  # used to update all enemies
         all_sprites_list.add(enemy_instance)
@@ -164,6 +148,12 @@ if __name__ == '__main__':
 
     skip_button = pygame.image.load("images/skip_button.png")
     skip_button.convert()  # button sprite.
+
+    land_tile = pygame.image.load("images/land_tile.jpg")
+
+    water_tile = pygame.image.load("images/water_tile.jpg")
+
+    wall_tile = pygame.image.load("images/wall_tile.jpg")
 
     # movement variables
     player_completedmove = True
@@ -251,13 +241,11 @@ if __name__ == '__main__':
         for y in range(len(levelblocklist)):
             for x in range(len(levelblocklist)):
                 if levelblocklist[y][x] == "#":
-                    pygame.draw.rect(screen, GRAY, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
+                    pygame.Surface.blit(screen, land_tile, [blockloc_x(x), blockloc_y(y)])
                 elif levelblocklist[y][x] == "_":
-                    pygame.draw.rect(screen, BLUE,
-                                     [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
+                    pygame.Surface.blit(screen, water_tile, [blockloc_x(x), blockloc_y(y)])
                 else:
-                    pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize])
-                pygame.draw.rect(screen, BLACK, [blockloc_x(x), blockloc_y(y), levelblocksize, levelblocksize], 1, 1)
+                    pygame.Surface.blit(screen, wall_tile, [blockloc_x(x), blockloc_y(y)])
 
         # enemy movement for loop
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Movement" and enemy_completedmove:
@@ -297,32 +285,23 @@ if __name__ == '__main__':
             tb.turnend(True)
 
         # update the colours of highlighted moves
-        step += 1
-        if step < number_of_steps:
+        if not switch_color_direction:
+            step += 4
+        else:
+            step -= 4
+        if 256 > step > 0:
             # (y-x)/number_of_steps calculates the amount of change per step required to
             # fade one channel of the old color to the new color
             # We multiply it with the current step counter
-            current_land_color = [x + (((y - x) / number_of_steps) * step) for x, y in
-                                  zip(pygame.color.Color(land_base_color), pygame.color.Color(land_next_color))]
-            current_water_color = [x + (((y - x) / number_of_steps) * step) for x, y in
-                                   zip(pygame.color.Color(water_base_color), pygame.color.Color(water_next_color))]
-            current_attack_land_color = [x + (((y - x) / number_of_steps) * step) for x, y in
-                                         zip(pygame.color.Color(attack_land_base_color),
-                                             pygame.color.Color(attack_land_next_color))]
-            current_attack_water_color = [x + (((y - x) / number_of_steps) * step) for x, y in
-                                          zip(pygame.color.Color(attack_water_base_color),
-                                              pygame.color.Color(attack_water_next_color))]
+            current_land_color.set_alpha(256 - step)
+            current_water_color.set_alpha(256 - step)
+            attack_land_color.set_alpha(256 - step)
+            attack_water_color.set_alpha(256 - step)
         else:
-            step = 0.5
-            land_base_color = land_next_color
-            land_next_color = next(landmovecolors)
-            water_base_color = water_next_color
-            water_next_color = next(watermovecolors)
-
-            attack_land_base_color = attack_land_next_color
-            attack_land_next_color = next(attackcolors_land)
-            attack_water_base_color = attack_water_next_color
-            attack_water_next_color = next(attackcolors_water)
+            if switch_color_direction:
+                switch_color_direction = False
+            else:
+                switch_color_direction = True
 
         # update player sprite
         player.rect.x = player.locationarray[0] * levelblocksize + (screen.get_width() - levelblocksize * 9) / 2 + (
@@ -458,8 +437,7 @@ if __name__ == '__main__':
 
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack":
             screen.blit(skip_button, [790, 635])
-            aa.drawattack(screen, worldnum, current_attack_land_color, current_attack_water_color, blockloc_x,
-                          blockloc_y, current_in_range)
+            aa.drawattack(screen, worldnum, attack_land_color, attack_water_color, blockloc_x, blockloc_y, current_in_range)
 
         all_sprites_list.draw(screen)
 
@@ -487,10 +465,7 @@ if __name__ == '__main__':
         if len(attack_list) > 0:
             for attack in attack_list:
                 draw_rect_alpha(screen, (255, 69, 0, 127), (
-                blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize, levelblocksize))
-                pygame.draw.rect(screen, BLACK,
-                                 [blockloc_x(attack.location[0]), blockloc_y(attack.location[1]), levelblocksize,
-                                  levelblocksize], 1, 1)
+                blockloc_x(attack.location[0]) + 1, blockloc_y(attack.location[1]) + 1, levelblocksize - 1, levelblocksize - 1))
 
         # a loop that detects if the mouse is hovering over the map.
         # if yes, then draw the type on bottom of screen
@@ -523,7 +498,6 @@ if __name__ == '__main__':
                 has_drawn_splash = True
 
         # DEBUG DEBUG DEBUG
-        screen.blit(detsans_normal.render("done_splash_text: " + str(has_drawn_splash), False, WHITE), [20, 590])
         screen.blit(detsans_normal.render("Player coord: " + str(player.locationarray), False, WHITE), [20, 620])
         screen.blit(detsans_normal.render("X coord: " + str(pygame.mouse.get_pos()[0]), False, WHITE), [20, 650])
         screen.blit(detsans_normal.render("Y coord: " + str(pygame.mouse.get_pos()[1]), False, WHITE), [20, 680])

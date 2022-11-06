@@ -1,6 +1,8 @@
 import glob
 import os
 import random as rd
+import main as mn
+import pygame
 
 
 def create():
@@ -44,3 +46,4 @@ def read(levelnum):
         return returnedval  # already in a nested list / 2d list
     else:
         print("nope, world does not exist")
+
