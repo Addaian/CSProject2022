@@ -8,7 +8,7 @@ import math as m
 
 
 class BasicEnemy(pygame.sprite.Sprite):
-    def __init__(self, worldnum, occupied_list):
+    def __init__(self, worldnum, occupied_list, player_location):
         super().__init__()
         # this inherits __init__ (from pygame)'s pre-programmed functions
         self.locationarray = [0, 0]
@@ -18,7 +18,7 @@ class BasicEnemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.image.fill(mn.RED)
         # spawn the enemy in the world, at a random location on the map.
-        self.spawn(worldnum, occupied_list)
+        self.spawn(worldnum, occupied_list, player_location)
         # all attributes associated with the player character
         self.movementspeed = 2
         self.health = random.randint(3, 5)
@@ -111,7 +111,7 @@ class BasicEnemy(pygame.sprite.Sprite):
         return []  # returns blanks if no more movement distance.
 
     # this function will pick a random location that is a land tile, and spawn the enemy on it.
-    def spawn(self, worldnum, occupied_list):
+    def spawn(self, worldnum, occupied_list, player_location):
         worldarray = wc.read(worldnum)
         x_length = len(worldarray[0]) - 2  # need to subtract 2 because of the \n at the end of each list
         y_length = len(worldarray) - 1  # number of lists, -1. 9 lists, need 9 - 1 = 8 to iterate.
@@ -121,13 +121,14 @@ class BasicEnemy(pygame.sprite.Sprite):
             final_y = random.randint(0, y_length)
             if worldarray[final_y][final_x] == "#":
                 if [final_x, final_y] not in occupied_list:
-                    done = True
+                    if abs(final_x - player_location[0]) + abs(final_y - player_location[1]) > 3:
+                        done = True
         self.updatelocation(final_x, final_y)
 
 
 class RookEnemy(BasicEnemy):
-    def __init__(self, worldnum, occupied_list):
-        super().__init__(worldnum, occupied_list)
+    def __init__(self, worldnum, occupied_list, player_location):
+        super().__init__(worldnum, occupied_list, player_location)
         self.awareness_radius = 100
         self.name = "Orange Blit"
         self.attack = random.randint(2, 3)

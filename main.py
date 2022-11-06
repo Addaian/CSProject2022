@@ -140,12 +140,12 @@ if __name__ == '__main__':
     # using this for loop, spawn an initial 5 enemies into first world.
     for i in range(int(m.ceil(difficulty * 3.5))):
         if random.randint(1, 7) >= 3:
-            enemy_instance = ea.BasicEnemy(worldnum, occ_list)
+            enemy_instance = ea.BasicEnemy(worldnum, occ_list, player.locationarray)
             occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
             enemylist.append(enemy_instance)  # used to update all enemies
             all_sprites_list.add(enemy_instance)
         else:
-            enemy_instance = ea.RookEnemy(worldnum, occ_list)
+            enemy_instance = ea.RookEnemy(worldnum, occ_list, player.locationarray)
             occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
             enemylist.append(enemy_instance)  # used to update all enemies
             all_sprites_list.add(enemy_instance)
