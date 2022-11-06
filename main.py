@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     # using this for loop, spawn an initial 5 enemies into first world.
     for i in range(int(m.ceil(difficulty * 3.5))):
-        if random.randint(1, 7) >= 3:
+        if random.randint(1, 7) >= 8:
             enemy_instance = ea.BasicEnemy(worldnum, occ_list, player.locationarray)
             occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
             enemylist.append(enemy_instance)  # used to update all enemies
@@ -259,7 +259,6 @@ if __name__ == '__main__':
             while len(attack_list) != 0:
                 if attack_list[0].location == player.locationarray:
                     player.health -= attack_list[0].damage
-                    print("hit!", player.locationarray, attack_list[0].location)
                 attack_list.pop(0)  # this will remove the front element of the list instead of the last.
             enemy_event_list = []  # this list will be iterated and animated.
             for enemy in enemylist:
@@ -458,15 +457,16 @@ if __name__ == '__main__':
             if enemy.rect.collidepoint(pygame.mouse.get_pos()):
                 screen.blit(detsans_large.render(str(enemy.name), False, WHITE), [920, 80])
                 temp_draw_enemy_attack = []
+                ea.drawhealth(screen, detsans_normal, enemy.health)
+                ea.drawattack(screen, detsans_normal, enemy.attack)
+                screen.blit(detsans_normal.render("Location: " + str(enemy.locationarray), False, WHITE), [920, 210])
                 for attack in attack_list:
                     if attack.origin == enemy.locationarray:
                         temp_draw_enemy_attack.append(attack.location)
                     if len(temp_draw_enemy_attack) != 0:
-                        screen.blit(detsans_normal.render("Attacking: ", False, WHITE), [920, 210])
+                        screen.blit(detsans_normal.render("Attacking: ", False, WHITE), [920, 240])
                         for i in range(len(temp_draw_enemy_attack)):
-                            screen.blit(detsans_normal.render(str(temp_draw_enemy_attack[i]), False, WHITE), [1050, 210 + 30 * i])
-                ea.drawhealth(screen, detsans_normal, enemy.health)
-                ea.drawattack(screen, detsans_normal, enemy.attack)
+                            screen.blit(detsans_normal.render(str(temp_draw_enemy_attack[i]), False, WHITE), [1050, 240 + 30 * i])
 
         # blit player attributes to left of screen
         screen.blit(detsans_large.render("Player", False, WHITE), [3, 80])

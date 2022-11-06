@@ -96,9 +96,50 @@ def enemy_attack(worldnum, enemy_class, enemy_location, player_location, attack_
                     else:
                         not_hit_obstacle = False
                 return attack_list
-        elif distance > 1:
+        else:
             direction = random.choice([-1, 1])
             axis = random.choice([0, 1])
+            if player_location[0] - enemy_location[0] == 0:
+                dist = enemy_location[1] - player_location[1]
+                if dist < 0:
+                    for i in range(abs(dist)):
+                        if worldarray[player_location[1] - i][player_location[0]] == "^":
+                            direction = random.choice([-1, 1])
+                            axis = random.choice([0, 1])
+                            break
+                        else:
+                            direction = 1
+                            axis = 1
+                else:
+                    for i in range(dist):
+                        if worldarray[player_location[1] + i][player_location[0]] == "^":
+                            direction = random.choice([-1, 1])
+                            axis = random.choice([0, 1])
+                            break
+                        else:
+                            direction = -1
+                            axis = 1
+            if player_location[1] - enemy_location[1] == 0:
+                dist = enemy_location[0] - player_location[0]
+                if dist < 0:
+                    for i in range(abs(dist)):
+                        if worldarray[player_location[1]][player_location[0] - i] == "^":
+                            direction = random.choice([-1, 1])
+                            axis = random.choice([0, 1])
+                            break
+                        else:
+                            direction = 1
+                            axis = 0
+                else:
+                    for i in range(dist):
+                        if worldarray[player_location[1]][player_location[0] + i] == "^":
+                            direction = random.choice([-1, 1])
+                            axis = random.choice([0, 1])
+                            break
+                        else:
+                            direction = -1
+                            axis = 0
+
             attack_list = []
             not_hit_obstacle = True
             x_direct = enemy_location[0]
