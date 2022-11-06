@@ -468,12 +468,10 @@ if __name__ == '__main__':
                 ea.drawhealth(screen, detsans_normal, enemy.health)
                 ea.drawattack(screen, detsans_normal, enemy.attack)
 
-        # a loop that detects if the mouse is hovering on the player.
-        # if yes, then draw the attributes of player on left side of screen
-        if player.rect.collidepoint(pygame.mouse.get_pos()):
-            screen.blit(detsans_large.render("Player", False, WHITE), [180, 80])
-            pa.drawhealth(screen, detsans_normal, player.health)
-            pa.drawattack(screen, detsans_normal, player.attack)
+        # blit player attributes to left of screen
+        screen.blit(detsans_large.render("Player", False, WHITE), [3, 80])
+        pa.drawhealth(screen, detsans_normal, player.health)
+        pa.drawattack(screen, detsans_normal, player.attack)
 
         # a loop that detects if there are any impending enemy attacks.
         # if yes, then draw the attack transparently.
