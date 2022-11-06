@@ -69,6 +69,7 @@ attack_list = []  # this list is used to notate a tile that is about to be attac
 has_drawn_splash = False  # this bool will ask every start of turn if the splash indicator has been drawn.
 draw_splash_alpha = 256
 
+
 # additional info: the tile will finish being attacked before the next enemy movement. Other attacks will have a longer time to finish.
 
 
@@ -152,8 +153,10 @@ if __name__ == '__main__':
 
     all_sprites_list.add(player)  # used to draw both player and enemy at the end of the loop.
 
-    skip_button = pygame.image.load("images/skip_button.png")
-    skip_button.convert()  # button sprite.
+    # load all sprites.
+
+    skip_button = pygame.image.load("images/skip_button1.png")
+    skip_button_clicked = False
 
     land_tile = pygame.image.load("images/land_tile.jpg")
 
@@ -199,8 +202,7 @@ if __name__ == '__main__':
                 if event.button == 1 and tb.turntitle[
                     (tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
                     if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
-                        tb.skipturn()
-                        has_drawn_splash = False
+                        skip_button_clicked = True
                         break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
@@ -220,8 +222,7 @@ if __name__ == '__main__':
                 if event.button == 1 and tb.turntitle[
                     (tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmove:
                     if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
-                        tb.skipturn()
-                        has_drawn_splash = False
+                        skip_button_clicked = True
                         break
                     pos_x = find_mouse_location("x")
                     pos_y = find_mouse_location("y")
@@ -237,7 +238,12 @@ if __name__ == '__main__':
                         tb.turnend(True)
                         has_drawn_splash = False
                         aa.calculate_melee(player.locationarray, player.reach, occ_list)
-
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1 and skip_button_clicked:
+                    if pygame.Rect.collidepoint(skip_button.get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
+                        tb.skipturn()
+                        has_drawn_splash = False
+                    skip_button_clicked = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     tb.turnend(True)
@@ -285,8 +291,9 @@ if __name__ == '__main__':
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Attack" and enemy_completedmove:
             if len(enemylist) > 0:
                 for enemy in enemylist:
-                    attack = aa.enemy_attack(worldnum, enemy.__class__.__name__, enemy.locationarray, player.locationarray,
-                                                      enemy.attack_timer, enemy.attack)
+                    attack = aa.enemy_attack(worldnum, enemy.__class__.__name__, enemy.locationarray,
+                                             player.locationarray,
+                                             enemy.attack_timer, enemy.attack)
                     if attack is not None:
                         if type(attack) == list:
                             attack_list.extend(attack)
@@ -322,12 +329,12 @@ if __name__ == '__main__':
         # update enemy sprites
         for i in range(len(enemylist)):
             enemylist[i].rect.x = enemylist[i].locationarray[0] * levelblocksize + (
-                        screen.get_width() - levelblocksize * 9) / 2 + (
+                    screen.get_width() - levelblocksize * 9) / 2 + (
                                           (levelblocksize - 20) / 2)
             if i == len(enemylist) - len(enemy_event_list):
                 enemylist[i].rect.x += enemy_tempaddx
             enemylist[i].rect.y = enemylist[i].locationarray[1] * levelblocksize + (
-                        screen.get_height() - levelblocksize * 9) / 2 + (
+                    screen.get_height() - levelblocksize * 9) / 2 + (
                                           (levelblocksize - 20) / 2)
             if i == len(enemylist) - len(enemy_event_list):
                 enemylist[i].rect.y += enemy_tempaddy
@@ -439,6 +446,10 @@ if __name__ == '__main__':
 
         screen.blit(detsans_normal.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
 
+        if pygame.mouse.get_pressed()[0] and skip_button_clicked:
+            skip_button = pygame.image.load("images/skip_button2.png")
+        else:
+            skip_button = pygame.image.load("images/skip_button1.png")
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement":
             screen.blit(skip_button, [790, 635])
             if player_completedmove:
@@ -447,7 +458,8 @@ if __name__ == '__main__':
 
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack":
             screen.blit(skip_button, [790, 635])
-            aa.drawattack(screen, worldnum, attack_land_color, attack_water_color, blockloc_x, blockloc_y, current_in_range)
+            aa.drawattack(screen, worldnum, attack_land_color, attack_water_color, blockloc_x, blockloc_y,
+                          current_in_range)
 
         all_sprites_list.draw(screen)
 
@@ -466,7 +478,8 @@ if __name__ == '__main__':
                     if len(temp_draw_enemy_attack) != 0:
                         screen.blit(detsans_normal.render("Attacking: ", False, WHITE), [920, 240])
                         for i in range(len(temp_draw_enemy_attack)):
-                            screen.blit(detsans_normal.render(str(temp_draw_enemy_attack[i]), False, WHITE), [1050, 240 + 30 * i])
+                            screen.blit(detsans_normal.render(str(temp_draw_enemy_attack[i]), False, WHITE),
+                                        [1050, 240 + 30 * i])
 
         # blit player attributes to left of screen
         screen.blit(detsans_large.render("Player", False, WHITE), [3, 80])
@@ -478,7 +491,8 @@ if __name__ == '__main__':
         if len(attack_list) > 0:
             for attack in attack_list:
                 draw_rect_alpha(screen, (255, 69, 0, 127), (
-                blockloc_x(attack.location[0]) + 1, blockloc_y(attack.location[1]) + 1, levelblocksize - 1, levelblocksize - 1))
+                    blockloc_x(attack.location[0]) + 1, blockloc_y(attack.location[1]) + 1, levelblocksize - 1,
+                    levelblocksize - 1))
 
         # a loop that detects if the mouse is hovering over the map.
         # if yes, then draw the type on bottom of screen
@@ -505,7 +519,8 @@ if __name__ == '__main__':
         if not has_drawn_splash:
             draw_splash_alpha = (draw_splash_alpha - 4)
             surf_splash_screen.set_alpha(draw_splash_alpha)
-            screen.blit(surf_splash_screen, ((screen.get_width() - surf_splash_screen.get_width()) / 2, (screen.get_height() - surf_splash_screen.get_height()) / 2))
+            screen.blit(surf_splash_screen, ((screen.get_width() - surf_splash_screen.get_width()) / 2,
+                                             (screen.get_height() - surf_splash_screen.get_height()) / 2))
             if draw_splash_alpha == 0:
                 draw_splash_alpha = 256
                 has_drawn_splash = True
