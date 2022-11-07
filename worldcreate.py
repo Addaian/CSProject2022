@@ -44,4 +44,3 @@ def read(levelnum):
         return returnedval  # already in a nested list / 2d list
     else:
         print("nope, world does not exist")
-
