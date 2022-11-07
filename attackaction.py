@@ -1,9 +1,6 @@
 import pygame
 import random
 import worldcreate as wc
-import main as mn
-import os
-import math as m
 
 
 # this function will find the enemies that is in range of the player.

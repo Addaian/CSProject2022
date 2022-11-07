@@ -1,8 +1,6 @@
 import glob
 import os
 import random as rd
-import main as mn
-import pygame
 
 
 def create():

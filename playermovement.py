@@ -1,9 +1,5 @@
 import pygame
-import random
-import math as m
-import main as mn
 import worldcreate as wc
-import itertools
 
 
 # this function pops out all coordinates on the map, that the player can possibly move to, in a list datatype

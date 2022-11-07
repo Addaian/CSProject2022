@@ -1,7 +1,5 @@
 import glob
-import itertools
 import math as m
-import time as t
 import random
 
 import pygame
@@ -50,15 +48,6 @@ current_land_color.fill(YELLOW)
 current_water_color = pygame.Surface([levelblocksize - 1, levelblocksize - 1])
 current_water_color.fill(YELLOW)
 
-
-def blockloc_x(var_x):
-    return (var_x * levelblocksize) + (screen.get_width() - levelblocksize * 9) / 2
-
-
-def blockloc_y(var_y):
-    return (var_y * levelblocksize) + (screen.get_height() - levelblocksize * 9) / 2
-
-
 # global variables
 worldnum = 0  # world number - the unique identifier of a world in a floor.
 difficulty = 2  # difficulty - 1 - easy, 2 - medium, 3 - hard, 4 - ironmode (1 health cap)
@@ -69,12 +58,16 @@ attack_list = []  # this list is used to notate a tile that is about to be attac
 has_drawn_splash = False  # this bool will ask every start of turn if the splash indicator has been drawn.
 draw_splash_alpha = 256
 
-
-# additional info: the tile will finish being attacked before the next enemy movement. Other attacks will have a longer time to finish.
-
-
 # global functions
 #  duplicate code functions
+
+def blockloc_x(var_x):
+    return (var_x * levelblocksize) + (screen.get_width() - levelblocksize * 9) / 2
+
+
+def blockloc_y(var_y):
+    return (var_y * levelblocksize) + (screen.get_height() - levelblocksize * 9) / 2
+
 
 def remove_redundancy(listofcoords):
     temporaryvar = -1  # -1, as we want the while loop to loop at least once.
@@ -140,7 +133,7 @@ if __name__ == '__main__':
 
     # using this for loop, spawn an initial 5 enemies into first world.
     for i in range(int(m.ceil(difficulty * 3.5))):
-        if random.randint(1, 7) >= 8:
+        if random.randint(1, 7) >= 3:
             enemy_instance = ea.BasicEnemy(worldnum, occ_list, player.locationarray)
             occ_list.append(enemy_instance.locationarray)  # this space is now unavailable for future moves.
             enemylist.append(enemy_instance)  # used to update all enemies
@@ -261,6 +254,8 @@ if __name__ == '__main__':
 
         # enemy movement for loop
         if tb.turntitle[(tb.turnnumber - 1) % 4] == "Enemy Movement" and enemy_completedmove:
+            # additional info: the tile will finish being attacked before the next enemy movement.
+            # Other attacks will have a longer time to finish.
             # if player moves into an attack, attack is not registered.
             while len(attack_list) != 0:
                 if attack_list[0].location == player.locationarray:

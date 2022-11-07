@@ -1,9 +1,5 @@
-import pygame
 import random
-import math as m
-import main as mn
 import worldcreate as wc
-import itertools
 
 
 # using the same logic as the function in playermovement.py , we can calculate the movable spots of an enemy.

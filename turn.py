@@ -1,15 +1,7 @@
-import pygame
-import random
-import worldcreate as wc
-import main as mn
-import playerattributes as pa
-import os
-import math as m
 
-
-def turnend(bool):
+def turnend(boolean):
     global turnnumber
-    if bool:
+    if boolean:
         turnnumber += 1
 
 def skipturn():

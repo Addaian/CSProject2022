@@ -1,7 +1,5 @@
 import os
-
 import pygame
-
 import main as mn
 import worldcreate as wc
 
@@ -19,7 +17,7 @@ class PlayerClass(pygame.sprite.Sprite):
         self.spawn(worldnum)
 
         # all attributes associated with the player character
-        self.movementspeed = 7  # the max number of traversable spaces a character may travel at once.
+        self.movementspeed = 3  # the max number of traversable spaces a character may travel at once.
         self.health = 4  # the health value of a character
         self.attack = 2  # the damage a character may deal in one cycle
         self.reach = 2  # the attack reach a character has
