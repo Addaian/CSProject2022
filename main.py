@@ -216,6 +216,7 @@ if __name__ == '__main__':
                         for i in range(1, len(glob.glob('levels/*')) + 1):
                             wc.remove(i)
                         done = True
+                        quit_game = True
                         break
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
@@ -559,5 +560,7 @@ if __name__ == '__main__':
                 pygame.display.flip()
                 # Limit to 60 frames per second
                 clock.tick(60)
+            if quit_game:
+                pygame.quit()
 
 pygame.quit()
