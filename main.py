@@ -160,18 +160,43 @@ if __name__ == '__main__':
             ss = Spritesheet("images/menu_screen.png")
             menu_screen = ss.image_at((0, 0, 1280, 720))
 
+            ss = Spritesheet("images/start_button.png")
+            start_button = ss.images_at([(0, 0, 120, 60), (120, 0, 120, 60)])
+            start_button = [pygame.transform.scale(i, [240, 120]) for i in start_button]
+            start_state = 0
+
+            ss = Spritesheet("images/quit_button.png")
+            quit_button = ss.images_at([(0, 0, 120, 60), (120, 0, 120, 60)])
+            quit_button = [pygame.transform.scale(i, [240, 120]) for i in quit_button]
+            quit_state = 0
+
+            button_location = [(screen.get_width() - start_button[start_state].get_width()) / 2, screen.get_height() / 3 + 60]
             done = False
             while not done:
                 screen.blit(menu_screen, [0, 0])  # this will blit the background onto the screen.
-
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         done = True
                         quit_game = True
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_1:
-                            done = True
-                            gamestate = "game"
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            if pygame.Rect.collidepoint(start_button[start_state].get_rect(topleft=button_location), pygame.mouse.get_pos()):
+                                start_state = 1
+                            if pygame.Rect.collidepoint(quit_button[quit_state].get_rect(topleft=[button_location[0], button_location[1] + 160]), pygame.mouse.get_pos()):
+                                quit_state = 1
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        if event.button == 1 and start_state == 1:
+                            if pygame.Rect.collidepoint(start_button[1].get_rect(topleft=button_location), pygame.mouse.get_pos()):
+                                done = True
+                                gamestate = "game"
+                            start_state = 0
+                        if event.button == 1 and quit_state == 1:
+                            if pygame.Rect.collidepoint(quit_button[1].get_rect(topleft=[button_location[0], button_location[1] + 160]), pygame.mouse.get_pos()):
+                                done = True
+                                quit_game = True
+                            quit_state = 0
+                screen.blit(start_button[start_state], button_location)
+                screen.blit(quit_button[quit_state], [button_location[0], button_location[1] + 160])
 
                 # update the screen.
                 pygame.display.flip()
@@ -212,7 +237,7 @@ if __name__ == '__main__':
             # load all sprites.
             ss = Spritesheet("images/skip_button.png")
             skip_button = ss.images_at([(0, 0, 120, 60), (120, 0, 240, 60)])
-            skip_buttstate = 0
+            skip_state = 0
 
             land_tile = pygame.image.load("images/land_tile.jpg")
 
@@ -259,8 +284,8 @@ if __name__ == '__main__':
                         break
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1 and tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement" and player_completedmove:
-                            if pygame.Rect.collidepoint(skip_button[skip_buttstate].get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
-                                skip_buttstate = (skip_buttstate + 1) % 2
+                            if pygame.Rect.collidepoint(skip_button[skip_state].get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
+                                skip_state = 1
                                 break
                             pos_x = find_mouse_location("x")
                             pos_y = find_mouse_location("y")
@@ -278,8 +303,8 @@ if __name__ == '__main__':
 
                         if event.button == 1 and tb.turntitle[
                             (tb.turnnumber - 1) % 4] == "Player Attack" and player_completedmove:
-                            if pygame.Rect.collidepoint(skip_button[skip_buttstate].get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
-                                skip_buttstate = (skip_buttstate + 1) % 2
+                            if pygame.Rect.collidepoint(skip_button[skip_state].get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
+                                skip_state = 1
                                 break
                             pos_x = find_mouse_location("x")
                             pos_y = find_mouse_location("y")
@@ -301,11 +326,11 @@ if __name__ == '__main__':
                                 has_drawn_splash = False
                                 aa.calculate_melee(player.locationarray, player.reach, occ_list)
                     if event.type == pygame.MOUSEBUTTONUP:
-                        if event.button == 1 and skip_buttstate == 1:
+                        if event.button == 1 and skip_state == 1:
                             if pygame.Rect.collidepoint(skip_button[1].get_rect(topleft=[790, 635]), pygame.mouse.get_pos()):
                                 tb.skipturn()
                                 has_drawn_splash = False
-                            skip_buttstate = 0
+                            skip_state = 0
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
                             tb.turnend(True)
@@ -515,13 +540,13 @@ if __name__ == '__main__':
                 #  screen.blit(detsans_normal.render(str(tb.turntitle[(tb.turnnumber - 1) % 4]), False, WHITE), [10, 40])
 
                 if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Movement":
-                    screen.blit(skip_button[skip_buttstate], [790, 635])
+                    screen.blit(skip_button[skip_state], [790, 635])
                     if player_completedmove:
                         pm.drawlandmove(screen, current_land_color, blockloc_x, blockloc_y, current_land_movable)
                         pm.drawwatermove(screen, current_water_color, blockloc_x, blockloc_y, current_water_movable)
 
                 if tb.turntitle[(tb.turnnumber - 1) % 4] == "Player Attack":
-                    screen.blit(skip_button[skip_buttstate], [790, 635])
+                    screen.blit(skip_button[skip_state], [790, 635])
                     aa.drawattack(screen, worldnum, attack_land_color, attack_water_color, blockloc_x, blockloc_y,
                                   current_in_range)
 
